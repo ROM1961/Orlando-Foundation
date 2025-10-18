@@ -252,8 +252,8 @@ async def get_vault_balance(vault_id: str, user_id: str = Depends(get_current_us
         eth_price = await get_eth_price()
         acs_price = await get_acs_price()
         
-        # Get ACS token balance (mock for now)
-        acs_balance = 1000.0  # Mock balance
+        # Get ACS token balance
+        acs_balance = await get_acs_balance(vault_address)
         
         eth_usd = eth_balance * eth_price
         acs_usd = acs_balance * acs_price
