@@ -148,23 +148,23 @@ async def get_eth_price() -> float:
 async def get_acs_price() -> float:
     """Get ACS token price from custom price feed contract"""
     try:
-        # ABI for the custom ACS price feed
+        # ABI for the ACS price feed - getCurrentPrice() function
         price_feed_abi = [
             {
                 "inputs": [],
-                "name": "getLatestPrice",
-                "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                "name": "getCurrentPrice",
+                "outputs": [{"internalType": "int256", "name": "", "type": "int256"}],
                 "stateMutability": "view",
                 "type": "function"
             }
         ]
         contract = w3.eth.contract(address=os.environ['ACS_PRICE_FEED'], abi=price_feed_abi)
-        price = contract.functions.getLatestPrice().call()
-        # Assuming price is returned with 8 decimals like Chainlink
+        price = contract.functions.getCurrentPrice().call()
+        # Price is returned with 8 decimals (e.g., 78000000 = $0.78)
         return float(price) / 10**8
     except Exception as e:
         logging.warning(f"Error fetching ACS price from contract: {e}")
-        return 1.25  # Fallback price
+        return 0.78  # Fallback price based on current value
 
 async def get_acs_balance(vault_address: str) -> float:
     """Get ACS token balance for a vault"""
