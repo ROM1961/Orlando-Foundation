@@ -199,9 +199,9 @@ async def create_vault(vault: CreateVault, user_id: str = Depends(get_current_us
         
         vault_id = str(uuid.uuid4())
         await conn.execute("""
-            INSERT INTO user_vaults (id, user_id, vault_address, owner_addresses, network, vault_type, label, private_key_encrypted, created_at, updated_at)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-        """, vault_id, user_id, vault_address, vault.owner_addresses, 'ethereum', vault.vault_type, vault.label, encrypted_key, datetime.now(timezone.utc), datetime.now(timezone.utc))
+            INSERT INTO user_vaults (id, user_id, vault_address, owner_addresses, network, vault_type, label, private_key_encrypted)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        """, vault_id, user_id, vault_address, vault.owner_addresses, 'ethereum', vault.vault_type, vault.label, encrypted_key)
         
         return {
             "vault_id": vault_id,
