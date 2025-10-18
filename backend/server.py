@@ -324,6 +324,21 @@ async def get_protocols():
         {"name": "Compound", "address": os.environ['COMPOUND_COMET'], "type": "lending"}
     ]
 
+@api_router.get("/tokens/acs")
+async def get_acs_token():
+    """Get ACS token information"""
+    async with pool.acquire() as conn:
+        token = await conn.fetchrow("SELECT token_symbol, token_name, token_address, decimals, network FROM custom_tokens WHERE token_symbol = 'ACS'")
+        if token:
+            return {
+                "symbol": token['token_symbol'],
+                "name": token['token_name'],
+                "address": token['token_address'],
+                "decimals": token['decimals'],
+                "network": token['network']
+            }
+        return {"symbol": "ACS", "name": "ACS Token", "address": "N/A", "decimals": 18, "network": "ethereum"}
+
 @api_router.get("/")
 async def root():
     return {"message": "Vault Wallet API", "status": "online"}
