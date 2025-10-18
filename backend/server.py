@@ -160,8 +160,8 @@ async def register(user: UserRegister):
         user_id = str(uuid.uuid4())
         hashed_pwd = hash_password(user.password)
         await conn.execute(
-            "INSERT INTO users (id, username, email, password_hash, created_at) VALUES ($1, $2, $3, $4, $5)",
-            user_id, user.username, user.email, hashed_pwd, datetime.now(timezone.utc)
+            "INSERT INTO users (id, username, email, password_hash) VALUES ($1, $2, $3, $4)",
+            user_id, user.username, user.email, hashed_pwd
         )
         
         # Generate token
