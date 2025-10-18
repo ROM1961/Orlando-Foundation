@@ -146,24 +146,46 @@ async def get_eth_price() -> float:
     return 3500.0  # Fallback price
 
 async def get_acs_price() -> float:
-    """Get ACS token price"""
-    return 1.25  # ACS token price
+    """Get ACS token price from custom price feed contract"""
+    try:
+        # ABI for the custom ACS price feed
+        price_feed_abi = [
+            {
+                "inputs": [],
+                "name": "getLatestPrice",
+                "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ]
+        contract = w3.eth.contract(address=os.environ['ACS_PRICE_FEED'], abi=price_feed_abi)
+        price = contract.functions.getLatestPrice().call()
+        # Assuming price is returned with 8 decimals like Chainlink
+        return float(price) / 10**8
+    except Exception as e:
+        logging.warning(f"Error fetching ACS price from contract: {e}")
+        return 1.25  # Fallback price
 
 async def get_acs_balance(vault_address: str) -> float:
     """Get ACS token balance for a vault"""
     try:
-        if os.environ.get('ACS_TOKEN') and os.environ['ACS_TOKEN'] != '0x0000000000000000000000000000000000000000':
-            # ERC20 ABI for balanceOf
-            erc20_abi = [{"constant":True,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"type":"function"}]
-            contract = w3.eth.contract(address=os.environ['ACS_TOKEN'], abi=erc20_abi)
-            balance_wei = contract.functions.balanceOf(vault_address).call()
-            return float(w3.from_wei(balance_wei, 'ether'))
-        else:
-            # Mock balance for demonstration
-            return 1000.0
+        # ERC20 ABI for balanceOf
+        erc20_abi = [
+            {
+                "constant": True,
+                "inputs": [{"name": "_owner", "type": "address"}],
+                "name": "balanceOf",
+                "outputs": [{"name": "balance", "type": "uint256"}],
+                "type": "function"
+            }
+        ]
+        contract = w3.eth.contract(address=os.environ['ACS_TOKEN'], abi=erc20_abi)
+        balance_wei = contract.functions.balanceOf(vault_address).call()
+        # Convert from wei to ACS (18 decimals)
+        return float(w3.from_wei(balance_wei, 'ether'))
     except Exception as e:
-        logging.warning(f"Error fetching ACS balance: {e}")
-        return 1000.0  # Fallback balance
+        logging.warning(f"Error fetching ACS balance for {vault_address}: {e}")
+        return 0.0  # Return 0 if no balance
 
 # Auth endpoints
 @api_router.post("/auth/register", response_model=Token)
