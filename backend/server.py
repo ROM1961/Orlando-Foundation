@@ -280,9 +280,9 @@ async def send_transaction(vault_id: str, tx: SendTransaction, user_id: str = De
         # Store transaction
         tx_id = str(uuid.uuid4())
         await conn.execute("""
-            INSERT INTO vault_transactions (id, vault_id, tx_hash, protocol_name, action, token_address, amount, gas_used, status, block_number, timestamp, created_at)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-        """, tx_id, vault_id, tx_hash_hex, None, 'send', None, str(tx.amount), '0.0', 'pending', 0, datetime.now(timezone.utc), datetime.now(timezone.utc))
+            INSERT INTO vault_transactions (id, vault_id, tx_hash, protocol_name, action, token_address, amount, gas_used, status, block_number, timestamp)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
+        """, tx_id, vault_id, tx_hash_hex, None, 'send', None, str(tx.amount), '0.0', 'pending', 0)
         
         return {"tx_hash": tx_hash_hex, "status": "pending"}
 
