@@ -23,7 +23,7 @@ load_dotenv(ROOT_DIR / '.env')
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
-db = client['vault_wallet']
+db = client[os.environ.get('DB_NAME', 'vault_wallet')]
 
 # Web3 setup
 ALCHEMY_URL = f"https://eth-mainnet.g.alchemy.com/v2/{os.environ['ALCHEMY_API_KEY']}"
