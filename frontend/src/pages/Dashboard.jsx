@@ -164,6 +164,7 @@ const Dashboard = ({ setIsAuthenticated }) => {
               alt="Logo" 
               className="w-12 h-12 rounded-full"
               data-testid="dashboard-logo"
+              onError={(e) => {e.target.src = 'https://via.placeholder.com/48?text=V'}}
             />
             <div>
               <h1 className="text-3xl font-bold text-white" style={{ fontFamily: 'Space Grotesk' }}>
