@@ -1,0 +1,60 @@
+services:
+  # Backend API Service
+  - type: web
+    name: vault-wallet-backend
+    env: python
+    region: frankfurt
+    plan: starter
+    buildCommand: cd backend && pip install -r requirements.txt
+    startCommand: cd backend && uvicorn server:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: MONGO_URL
+        sync: false
+      - key: DB_NAME
+        value: vault_wallet
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: ALCHEMY_API_KEY
+        value: OmycSw7kuH59o98EIRZLf
+      - key: ETHERSCAN_API_KEY
+        value: 5PYUYWT9KVPUAPI92G6A2GXYCPKGE2PH86
+      - key: ENCRYPTION_KEY
+        value: 899bdd1d6603b8ad056d17e3fc85eaf2346acc0b1156fb68654d46fff5b72d63
+      - key: COMPOUND_COMET
+        value: 0xA17581A9E3356d9A858b789D68B4d866e593aE94
+      - key: AAVE_POOL
+        value: 0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2
+      - key: ACS_PRICE_FEED
+        value: 0x359767f0CE82592eED2F13F19B0252eB539C2A2D
+      - key: ACS_TOKEN
+        value: 0x1769AA7B5B4AAe76B7E6D797B379c21cAE12c46d
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: JWT_EXPIRATION_HOURS
+        value: 24
+
+  # Frontend Service
+  - type: web
+    name: vault-wallet-frontend
+    env: node
+    region: frankfurt
+    plan: starter
+    buildCommand: cd frontend && yarn install && yarn build
+    startCommand: cd frontend && yarn global add serve && serve -s build -l $PORT
+    envVars:
+      - key: NODE_VERSION
+        value: 18.17.0
+      - key: REACT_APP_BACKEND_URL
+        fromService:
+          type: web
+          name: vault-wallet-backend
+          property: url
+
+databases:
+  - name: vault-wallet-mongodb
+    plan: starter
+    ipAllowList: []
