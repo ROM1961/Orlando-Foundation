@@ -63,6 +63,7 @@ const Login = ({ setIsAuthenticated }) => {
             alt="Vault Logo" 
             className="w-24 h-24 mx-auto mb-4 rounded-full"
             data-testid="vault-logo"
+            onError={(e) => {e.target.src = 'https://via.placeholder.com/96?text=Vault'}}
           />
           <h1 className="text-4xl sm:text-5xl font-bold mb-2" style={{ fontFamily: 'Space Grotesk' }}>
             <span className="gradient-text">Vault Wallet</span>
