@@ -313,10 +313,23 @@ const Dashboard = ({ setIsAuthenticated }) => {
                               <DialogHeader>
                                 <DialogTitle>Send Transaction</DialogTitle>
                                 <DialogDescription className="text-gray-400">
-                                  Transfer ETH or ACS tokens
+                                  Transfer from: {selectedVault?.label} ({formatAddress(selectedVault?.vault_address || "")})
                                 </DialogDescription>
                               </DialogHeader>
                               <form onSubmit={handleSendTransaction} className="space-y-4">
+                                <div>
+                                  <Label htmlFor="token_select" className="text-gray-300">Select Token</Label>
+                                  <select
+                                    id="token_select"
+                                    value={sendTx.token}
+                                    onChange={(e) => setSendTx({ ...sendTx, token: e.target.value })}
+                                    className="w-full bg-slate-800 border border-slate-600 text-white rounded-md p-2"
+                                    data-testid="send-token-select"
+                                  >
+                                    <option value="ETH">ETH (Ethereum)</option>
+                                    <option value="ACS">ACS (ArtCubeSociety Token)</option>
+                                  </select>
+                                </div>
                                 <div>
                                   <Label htmlFor="to_address" className="text-gray-300">Recipient Address</Label>
                                   <Input
@@ -330,7 +343,7 @@ const Dashboard = ({ setIsAuthenticated }) => {
                                   />
                                 </div>
                                 <div>
-                                  <Label htmlFor="amount" className="text-gray-300">Amount</Label>
+                                  <Label htmlFor="amount" className="text-gray-300">Amount ({sendTx.token})</Label>
                                   <Input
                                     id="amount"
                                     type="number"
@@ -342,9 +355,14 @@ const Dashboard = ({ setIsAuthenticated }) => {
                                     className="bg-slate-800 border-slate-600 text-white"
                                     data-testid="send-amount-input"
                                   />
+                                  {balance && (
+                                    <p className="text-xs text-gray-400 mt-1">
+                                      Available: {sendTx.token === "ETH" ? balance.eth_balance.toFixed(4) : balance.acs_balance.toFixed(2)} {sendTx.token}
+                                    </p>
+                                  )}
                                 </div>
                                 <Button type="submit" className="w-full btn-primary" disabled={loading} data-testid="send-tx-submit-btn">
-                                  {loading ? "Sending..." : "Send Transaction"}
+                                  {loading ? "Sending..." : `Send ${sendTx.token}`}
                                 </Button>
                               </form>
                             </DialogContent>
