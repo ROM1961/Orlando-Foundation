@@ -340,7 +340,9 @@ const Dashboard = ({ setIsAuthenticated }) => {
                                     data-testid="send-token-select"
                                   >
                                     <option value="ETH">ETH (Ethereum)</option>
-                                    <option value="ACS">ACS (ArtCubeSociety Token)</option>
+                                    <option value="ACS">ACS (ArtCubeSociety)</option>
+                                    <option value="USDC">USDC (USD Coin)</option>
+                                    <option value="USDT">USDT (Tether)</option>
                                   </select>
                                 </div>
                                 <div>
