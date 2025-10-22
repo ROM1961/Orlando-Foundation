@@ -390,7 +390,12 @@ const Dashboard = ({ setIsAuthenticated }) => {
                                   />
                                   {balance && (
                                     <p className="text-xs text-gray-400 mt-1">
-                                      Available: {sendTx.token === "ETH" ? balance.eth_balance.toFixed(4) : balance.acs_balance.toFixed(2)} {sendTx.token}
+                                      Available: {
+                                        sendTx.token === "ETH" ? balance.eth_balance?.toFixed(4) :
+                                        sendTx.token === "ACS" ? balance.acs_balance?.toFixed(2) :
+                                        sendTx.token === "USDC" ? balance.balances?.USDC?.toFixed(2) :
+                                        sendTx.token === "USDT" ? balance.balances?.USDT?.toFixed(2) : 0
+                                      } {sendTx.token}
                                     </p>
                                   )}
                                 </div>
