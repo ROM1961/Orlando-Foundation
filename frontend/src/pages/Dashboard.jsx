@@ -115,6 +115,14 @@ const Dashboard = ({ setIsAuthenticated }) => {
 
   const handleSendTransaction = async (e) => {
     e.preventDefault();
+    
+    // Check if wallet is watch-only
+    const vault = await db.user_vaults.find_one({"id": selectedVault.id, "user_id": user_id});
+    if (vault && vault.private_key_encrypted === b'watch_only_no_private_key') {
+      toast.error("Cannot send from watch-only wallet. This wallet was imported and doesn't have a private key.");
+      return;
+    }
+    
     setLoading(true);
     try {
       const response = await axios.post(
@@ -128,7 +136,12 @@ const Dashboard = ({ setIsAuthenticated }) => {
       fetchTransactions();
       setSendTx({ to_address: "", amount: "", token: "ETH" });
     } catch (error) {
-      toast.error(error.response?.data?.detail || "Transaction failed");
+      const errorMsg = error.response?.data?.detail || "Transaction failed";
+      if (errorMsg.includes("watch") || errorMsg.includes("private key")) {
+        toast.error("Cannot send: This is a watch-only wallet (imported address). Create a new wallet to send transactions.");
+      } else {
+        toast.error(errorMsg);
+      }
     } finally {
       setLoading(false);
     }
