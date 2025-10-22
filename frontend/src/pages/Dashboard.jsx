@@ -300,8 +300,8 @@ const Dashboard = ({ setIsAuthenticated }) => {
                               <DollarSign className="w-4 h-4 text-blue-400" />
                               <span className="text-gray-400 text-sm">Ethereum</span>
                             </div>
-                            <p className="text-2xl font-bold text-white">{balance.eth_balance.toFixed(4)} ETH</p>
-                            <p className="text-sm text-gray-400">${balance.eth_usd.toFixed(2)}</p>
+                            <p className="text-2xl font-bold text-white">{balance.eth_balance?.toFixed(4) || 0} ETH</p>
+                            <p className="text-sm text-gray-400">${balance.eth_usd?.toFixed(2) || 0}</p>
                           </div>
                           
                           <div className="bg-slate-800/50 p-4 rounded-lg" data-testid="acs-balance">
@@ -309,8 +309,26 @@ const Dashboard = ({ setIsAuthenticated }) => {
                               <TrendingUp className="w-4 h-4 text-purple-400" />
                               <span className="text-gray-400 text-sm">ACS Token</span>
                             </div>
-                            <p className="text-2xl font-bold text-white">{balance.acs_balance.toFixed(2)} ACS</p>
-                            <p className="text-sm text-gray-400">${balance.acs_usd.toFixed(2)}</p>
+                            <p className="text-2xl font-bold text-white">{balance.acs_balance?.toFixed(2) || 0} ACS</p>
+                            <p className="text-sm text-gray-400">${balance.acs_usd?.toFixed(2) || 0}</p>
+                          </div>
+
+                          <div className="bg-slate-800/50 p-4 rounded-lg" data-testid="usdc-balance">
+                            <div className="flex items-center gap-2 mb-2">
+                              <DollarSign className="w-4 h-4 text-green-400" />
+                              <span className="text-gray-400 text-sm">USDC</span>
+                            </div>
+                            <p className="text-2xl font-bold text-white">{balance.balances?.USDC?.toFixed(2) || 0} USDC</p>
+                            <p className="text-sm text-gray-400">${balance.usd_values?.USDC?.toFixed(2) || 0}</p>
+                          </div>
+
+                          <div className="bg-slate-800/50 p-4 rounded-lg" data-testid="usdt-balance">
+                            <div className="flex items-center gap-2 mb-2">
+                              <DollarSign className="w-4 h-4 text-teal-400" />
+                              <span className="text-gray-400 text-sm">USDT</span>
+                            </div>
+                            <p className="text-2xl font-bold text-white">{balance.balances?.USDT?.toFixed(2) || 0} USDT</p>
+                            <p className="text-sm text-gray-400">${balance.usd_values?.USDT?.toFixed(2) || 0}</p>
                           </div>
                         </div>
 
