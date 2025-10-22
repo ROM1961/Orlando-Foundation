@@ -274,28 +274,28 @@ async def get_vault_balance(vault_id: str, user_id: str = Depends(get_current_us
     
     vault_address = vault['vault_address']
     
-    # Get ETH balance
-    eth_balance_wei = w3.eth.get_balance(vault_address)
-    eth_balance = float(w3.from_wei(eth_balance_wei, 'ether'))
+    # Get all token balances
+    balances = token_manager.get_all_balances(vault_address)
     
-    # Get prices
-    eth_price = await get_eth_price()
-    acs_price = await get_acs_price()
+    # Get all token prices
+    prices = {symbol: token_manager.get_token_price(symbol) for symbol in TOKEN_CONFIG.keys()}
     
-    # Get ACS token balance
-    acs_balance = await get_acs_balance(vault_address)
+    # Calculate USD values
+    usd_values = {symbol: balances[symbol] * prices[symbol] for symbol in TOKEN_CONFIG.keys()}
+    total_usd = sum(usd_values.values())
     
-    eth_usd = eth_balance * eth_price
-    acs_usd = acs_balance * acs_price
-    
-    return VaultBalance(
-        vault_address=vault_address,
-        eth_balance=eth_balance,
-        eth_usd=eth_usd,
-        acs_balance=acs_balance,
-        acs_usd=acs_usd,
-        total_usd=eth_usd + acs_usd
-    )
+    return {
+        "vault_address": vault_address,
+        "balances": balances,
+        "prices": prices,
+        "usd_values": usd_values,
+        "total_usd": total_usd,
+        # Legacy fields for compatibility
+        "eth_balance": balances.get("ETH", 0.0),
+        "eth_usd": usd_values.get("ETH", 0.0),
+        "acs_balance": balances.get("ACS", 0.0),
+        "acs_usd": usd_values.get("ACS", 0.0)
+    }
 
 @api_router.post("/vaults/{vault_id}/send")
 async def send_transaction(vault_id: str, tx: SendTransaction, user_id: str = Depends(get_current_user)):
