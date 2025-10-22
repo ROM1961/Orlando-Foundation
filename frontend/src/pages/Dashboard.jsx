@@ -115,14 +115,6 @@ const Dashboard = ({ setIsAuthenticated }) => {
 
   const handleSendTransaction = async (e) => {
     e.preventDefault();
-    
-    // Check if wallet is watch-only
-    const vault = await db.user_vaults.find_one({"id": selectedVault.id, "user_id": user_id});
-    if (vault && vault.private_key_encrypted === b'watch_only_no_private_key') {
-      toast.error("Cannot send from watch-only wallet. This wallet was imported and doesn't have a private key.");
-      return;
-    }
-    
     setLoading(true);
     try {
       const response = await axios.post(
