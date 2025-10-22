@@ -16,6 +16,7 @@ from web3 import Web3
 from eth_account import Account
 from cryptography.fernet import Fernet
 import base64
+from euler_integration import EulerV2Integration, EULER_ADDRESSES
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
