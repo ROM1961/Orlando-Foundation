@@ -298,22 +298,57 @@ async def send_transaction(vault_id: str, tx: SendTransaction, user_id: str = De
     if not vault:
         raise HTTPException(status_code=404, detail="Vault not found")
     
+    # Check if wallet is watch-only
+    if vault['private_key_encrypted'] == b'watch_only_no_private_key':
+        raise HTTPException(status_code=403, detail="Cannot send from watch-only wallet. This wallet was imported without a private key.")
+    
     # Decrypt private key
-    private_key = decrypt_private_key(vault['private_key_encrypted'])
-    account = Account.from_key(private_key)
+    try:
+        private_key = decrypt_private_key(vault['private_key_encrypted'])
+        account = Account.from_key(private_key)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error decrypting private key: {str(e)}")
     
-    # Build transaction
+    # Build transaction based on token type
     nonce = w3.eth.get_transaction_count(vault['vault_address'])
-    amount_wei = w3.to_wei(tx.amount, 'ether')
     
-    transaction = {
-        'nonce': nonce,
-        'to': tx.to_address,
-        'value': amount_wei,
-        'gas': 21000,
-        'gasPrice': w3.eth.gas_price,
-        'chainId': 1
-    }
+    if tx.token == "ETH":
+        # ETH transfer
+        amount_wei = w3.to_wei(tx.amount, 'ether')
+        transaction = {
+            'nonce': nonce,
+            'to': tx.to_address,
+            'value': amount_wei,
+            'gas': 21000,
+            'gasPrice': w3.eth.gas_price,
+            'chainId': 1
+        }
+    elif tx.token == "ACS":
+        # ERC20 token transfer
+        erc20_abi = [
+            {
+                "constant": False,
+                "inputs": [
+                    {"name": "_to", "type": "address"},
+                    {"name": "_value", "type": "uint256"}
+                ],
+                "name": "transfer",
+                "outputs": [{"name": "", "type": "bool"}],
+                "type": "function"
+            }
+        ]
+        contract = w3.eth.contract(address=os.environ['ACS_TOKEN'], abi=erc20_abi)
+        amount_wei = w3.to_wei(tx.amount, 'ether')
+        
+        transaction = contract.functions.transfer(tx.to_address, amount_wei).build_transaction({
+            'from': vault['vault_address'],
+            'nonce': nonce,
+            'gas': 100000,
+            'gasPrice': w3.eth.gas_price,
+            'chainId': 1
+        })
+    else:
+        raise HTTPException(status_code=400, detail=f"Unsupported token: {tx.token}")
     
     # Sign and send
     signed = account.sign_transaction(transaction)
@@ -328,7 +363,7 @@ async def send_transaction(vault_id: str, tx: SendTransaction, user_id: str = De
         "tx_hash": tx_hash_hex,
         "protocol_name": None,
         "action": "send",
-        "token_address": None,
+        "token_address": os.environ['ACS_TOKEN'] if tx.token == "ACS" else None,
         "amount": str(tx.amount),
         "gas_used": "0.0",
         "status": "pending",
@@ -337,7 +372,7 @@ async def send_transaction(vault_id: str, tx: SendTransaction, user_id: str = De
         "created_at": datetime.now(timezone.utc)
     })
     
-    return {"tx_hash": tx_hash_hex, "status": "pending"}
+    return {"tx_hash": tx_hash_hex, "status": "pending", "token": tx.token}
 
 @api_router.get("/vaults/{vault_id}/transactions")
 async def get_transactions(vault_id: str, user_id: str = Depends(get_current_user)):
