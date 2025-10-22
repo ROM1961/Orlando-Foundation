@@ -35,6 +35,9 @@ w3 = Web3(Web3.HTTPProvider(ALCHEMY_URL))
 # Initialize Euler V2 Integration
 euler = EulerV2Integration(w3)
 
+# Initialize Multi-Token Manager
+token_manager = MultiTokenManager(w3)
+
 # Encryption setup
 cipher_suite = Fernet(base64.urlsafe_b64encode(bytes.fromhex(os.environ['ENCRYPTION_KEY'])))
 
