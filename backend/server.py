@@ -435,6 +435,14 @@ async def get_acs_token():
         }
     return {"symbol": "ACS", "name": "ACS Token", "address": "N/A", "decimals": 18, "network": "ethereum"}
 
+@api_router.get("/tokens/supported")
+async def get_supported_tokens():
+    """Get list of all supported tokens"""
+    return {
+        "tokens": TOKEN_CONFIG,
+        "count": len(TOKEN_CONFIG)
+    }
+
 @api_router.get("/")
 async def root():
     return {"message": "Vault Wallet API", "status": "online", "database": "MongoDB"}
