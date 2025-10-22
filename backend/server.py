@@ -30,6 +30,9 @@ db = client[os.environ.get('DB_NAME', 'vault_wallet')]
 ALCHEMY_URL = f"https://eth-mainnet.g.alchemy.com/v2/{os.environ['ALCHEMY_API_KEY']}"
 w3 = Web3(Web3.HTTPProvider(ALCHEMY_URL))
 
+# Initialize Euler V2 Integration
+euler = EulerV2Integration(w3)
+
 # Encryption setup
 cipher_suite = Fernet(base64.urlsafe_b64encode(bytes.fromhex(os.environ['ENCRYPTION_KEY'])))
 
