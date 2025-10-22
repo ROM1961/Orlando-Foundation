@@ -357,8 +357,50 @@ async def get_transactions(vault_id: str, user_id: str = Depends(get_current_use
 async def get_protocols():
     return [
         {"name": "Aave", "address": os.environ['AAVE_POOL'], "type": "lending"},
-        {"name": "Compound", "address": os.environ['COMPOUND_COMET'], "type": "lending"}
+        {"name": "Compound", "address": os.environ['COMPOUND_COMET'], "type": "lending"},
+        {"name": "Euler V2", "address": EULER_ADDRESSES["EVC"], "type": "governed_vaults"}
     ]
+
+# Euler V2 endpoints
+@api_router.get("/euler/vaults/{vault_address}/info")
+async def get_euler_vault_info(vault_address: str, account: str):
+    """Get Euler vault information for an account"""
+    try:
+        info = euler.get_vault_info(vault_address, account)
+        return info
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/euler/accounts/{account_address}/collaterals")
+async def get_euler_collaterals(account_address: str):
+    """Get list of collateral vaults for an account"""
+    try:
+        collaterals = euler.get_account_collaterals(account_address)
+        return {"account": account_address, "collaterals": collaterals}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/euler/vaults/{vault_address}/health")
+async def get_euler_vault_health(vault_address: str, account: str):
+    """Get health factor for account in Euler vault"""
+    try:
+        liquidity = euler.get_account_liquidity(vault_address, account)
+        return {
+            "vault_address": vault_address,
+            "account": account,
+            **liquidity
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/euler/contracts")
+async def get_euler_contracts():
+    """Get Euler V2 contract addresses"""
+    return {
+        "contracts": EULER_ADDRESSES,
+        "network": "ethereum_mainnet",
+        "chain_id": 1
+    }
 
 @api_router.get("/tokens/acs")
 async def get_acs_token():
