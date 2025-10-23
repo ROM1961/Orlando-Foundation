@@ -40,6 +40,12 @@ euler = EulerV2Integration(w3)
 # Initialize Multi-Token Manager
 token_manager = MultiTokenManager(w3)
 
+# Initialize Aave Integration
+aave = AaveIntegration(w3)
+
+# Initialize Compound Integration
+compound = CompoundIntegration(w3)
+
 # Encryption setup
 cipher_suite = Fernet(base64.urlsafe_b64encode(bytes.fromhex(os.environ['ENCRYPTION_KEY'])))
 
