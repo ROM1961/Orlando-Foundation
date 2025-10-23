@@ -484,10 +484,8 @@ const Dashboard = ({ setIsAuthenticated }) => {
                                     size="sm" 
                                     className="flex-1 bg-green-600 hover:bg-green-700 text-white"
                                     onClick={() => {
-                                      const message = protocol.name === "Aave" 
-                                        ? "Aave V3 Lending: Supply assets to earn interest. APY varies by asset."
-                                        : "Compound V3 Lending: Lend USDC and other assets to earn yield.";
-                                      toast.success(message, { duration: 5000 });
+                                      setDefiAction({ protocol: protocol.name, action: "Lend" });
+                                      setDefiDialogOpen(true);
                                     }}
                                     data-testid={`${protocol.name.toLowerCase()}-lend-btn`}
                                   >
@@ -498,10 +496,8 @@ const Dashboard = ({ setIsAuthenticated }) => {
                                     size="sm" 
                                     className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
                                     onClick={() => {
-                                      const message = protocol.name === "Aave"
-                                        ? "Aave V3 Borrowing: Use your assets as collateral to borrow."
-                                        : "Compound V3 Borrowing: Borrow against your supplied collateral.";
-                                      toast.success(message, { duration: 5000 });
+                                      setDefiAction({ protocol: protocol.name, action: "Borrow" });
+                                      setDefiDialogOpen(true);
                                     }}
                                     data-testid={`${protocol.name.toLowerCase()}-borrow-btn`}
                                   >
