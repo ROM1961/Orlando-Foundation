@@ -531,10 +531,45 @@ const Dashboard = ({ setIsAuthenticated }) => {
               }
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={(e) => {
+          <form onSubmit={async (e) => {
             e.preventDefault();
-            toast.success(`${defiAction.action} transaction prepared for ${defiAction.protocol}! Feature coming soon with smart contract integration.`, { duration: 5000 });
-            setDefiDialogOpen(false);
+            if (!selectedVault) {
+              toast.error("Please select a vault first");
+              return;
+            }
+            
+            setLoading(true);
+            try {
+              const response = await axios.post(
+                `${API}/defi/transaction`,
+                {
+                  vault_id: selectedVault.id,
+                  protocol: defiAction.protocol,
+                  action: defiAction.action,
+                  token: defiTx.token,
+                  amount: parseFloat(defiTx.amount)
+                },
+                getAuthHeaders()
+              );
+              
+              toast.success(
+                `${defiAction.action} transaction submitted! Hash: ${response.data.tx_hash.substring(0, 10)}...`,
+                { duration: 7000 }
+              );
+              setDefiDialogOpen(false);
+              setDefiTx({ token: "USDC", amount: "" });
+              fetchBalance();
+              fetchTransactions();
+            } catch (error) {
+              const errorMsg = error.response?.data?.detail || "Transaction failed";
+              if (errorMsg.includes("watch") || errorMsg.includes("private key")) {
+                toast.error("Cannot transact: This is a watch-only wallet. Create a new wallet to execute transactions.");
+              } else {
+                toast.error(errorMsg);
+              }
+            } finally {
+              setLoading(false);
+            }
           }} className="space-y-4">
             <div>
               <Label htmlFor="defi_token" className="text-gray-300">Select Token</Label>
