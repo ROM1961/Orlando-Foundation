@@ -23,6 +23,8 @@ const Dashboard = ({ setIsAuthenticated }) => {
   const [loading, setLoading] = useState(false);
   const [createVaultOpen, setCreateVaultOpen] = useState(false);
   const [sendTxOpen, setSendTxOpen] = useState(false);
+  const [defiDialogOpen, setDefiDialogOpen] = useState(false);
+  const [defiAction, setDefiAction] = useState({ protocol: "", action: "" });
   
   const [newVault, setNewVault] = useState({
     label: "",
@@ -35,6 +37,11 @@ const Dashboard = ({ setIsAuthenticated }) => {
     to_address: "",
     amount: "",
     token: "ETH"
+  });
+  
+  const [defiTx, setDefiTx] = useState({
+    token: "USDC",
+    amount: ""
   });
 
   const username = localStorage.getItem("username");
