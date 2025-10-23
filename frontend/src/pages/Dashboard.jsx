@@ -458,16 +458,41 @@ const Dashboard = ({ setIsAuthenticated }) => {
                           {protocols.map((protocol) => (
                             <div
                               key={protocol.name}
-                              className="flex items-center justify-between p-4 bg-slate-800/30 rounded-lg hover:bg-slate-800/50 transition cursor-pointer"
+                              className="p-4 bg-slate-800/30 rounded-lg hover:bg-slate-800/50 transition"
                               data-testid={`protocol-${protocol.name.toLowerCase()}`}
                             >
-                              <div>
-                                <p className="font-medium text-white">{protocol.name}</p>
-                                <p className="text-xs text-gray-400">{formatAddress(protocol.address)}</p>
+                              <div className="flex items-center justify-between mb-3">
+                                <div>
+                                  <p className="font-medium text-white">{protocol.name}</p>
+                                  <p className="text-xs text-gray-400">{formatAddress(protocol.address)}</p>
+                                </div>
+                                <Badge variant="outline" className="border-blue-500 text-blue-400">
+                                  {protocol.type}
+                                </Badge>
                               </div>
-                              <Badge variant="outline" className="border-blue-500 text-blue-400">
-                                {protocol.type}
-                              </Badge>
+                              
+                              {(protocol.name === "Aave" || protocol.name === "Compound") && (
+                                <div className="flex gap-2 mt-3">
+                                  <Button 
+                                    size="sm" 
+                                    className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                                    onClick={() => toast.info(`${protocol.name} Lending coming soon!`)}
+                                    data-testid={`${protocol.name.toLowerCase()}-lend-btn`}
+                                  >
+                                    <TrendingUp className="w-3 h-3 mr-1" />
+                                    Lend
+                                  </Button>
+                                  <Button 
+                                    size="sm" 
+                                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                                    onClick={() => toast.info(`${protocol.name} Borrowing coming soon!`)}
+                                    data-testid={`${protocol.name.toLowerCase()}-borrow-btn`}
+                                  >
+                                    <ArrowDownToLine className="w-3 h-3 mr-1" />
+                                    Borrow
+                                  </Button>
+                                </div>
+                              )}
                             </div>
                           ))}
                         </div>
