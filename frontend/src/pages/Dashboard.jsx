@@ -623,9 +623,10 @@ const Dashboard = ({ setIsAuthenticated }) => {
             <Button 
               type="submit" 
               className="w-full btn-primary" 
+              disabled={loading}
               data-testid="defi-submit-btn"
             >
-              Preview {defiAction.action}
+              {loading ? "Processing..." : `Execute ${defiAction.action}`}
             </Button>
           </form>
         </DialogContent>
