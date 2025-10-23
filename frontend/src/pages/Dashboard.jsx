@@ -518,6 +518,83 @@ const Dashboard = ({ setIsAuthenticated }) => {
           </div>
         </div>
       </div>
+
+      {/* DeFi Lend/Borrow Dialog */}
+      <Dialog open={defiDialogOpen} onOpenChange={setDefiDialogOpen}>
+        <DialogContent className="bg-slate-900 border-slate-700 text-white">
+          <DialogHeader>
+            <DialogTitle>{defiAction.protocol} - {defiAction.action}</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              {defiAction.action === "Lend" 
+                ? `Supply assets to ${defiAction.protocol} to earn interest`
+                : `Borrow assets from ${defiAction.protocol} using your collateral`
+              }
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            toast.success(`${defiAction.action} transaction prepared for ${defiAction.protocol}! Feature coming soon with smart contract integration.`, { duration: 5000 });
+            setDefiDialogOpen(false);
+          }} className="space-y-4">
+            <div>
+              <Label htmlFor="defi_token" className="text-gray-300">Select Token</Label>
+              <select
+                id="defi_token"
+                value={defiTx.token}
+                onChange={(e) => setDefiTx({ ...defiTx, token: e.target.value })}
+                className="w-full bg-slate-800 border border-slate-600 text-white rounded-md p-2"
+                data-testid="defi-token-select"
+              >
+                <option value="ETH">ETH (Ethereum)</option>
+                <option value="USDC">USDC (USD Coin)</option>
+                <option value="USDT">USDT (Tether)</option>
+                <option value="ACS">ACS (ArtCubeSociety)</option>
+              </select>
+            </div>
+            <div>
+              <Label htmlFor="defi_amount" className="text-gray-300">Amount</Label>
+              <Input
+                id="defi_amount"
+                type="number"
+                step="0.01"
+                value={defiTx.amount}
+                onChange={(e) => setDefiTx({ ...defiTx, amount: e.target.value })}
+                placeholder="0.0"
+                required
+                className="bg-slate-800 border-slate-600 text-white"
+                data-testid="defi-amount-input"
+              />
+              {balance && (
+                <p className="text-xs text-gray-400 mt-1">
+                  Available: {
+                    defiTx.token === "ETH" ? balance.eth_balance?.toFixed(4) :
+                    defiTx.token === "ACS" ? balance.acs_balance?.toFixed(2) :
+                    defiTx.token === "USDC" ? balance.balances?.USDC?.toFixed(2) :
+                    defiTx.token === "USDT" ? balance.balances?.USDT?.toFixed(2) : 0
+                  } {defiTx.token}
+                </p>
+              )}
+            </div>
+            <div className="bg-slate-800/50 p-3 rounded-lg">
+              <p className="text-sm text-gray-300 mb-1">Protocol: <span className="text-white font-semibold">{defiAction.protocol}</span></p>
+              <p className="text-sm text-gray-300">Action: <span className="text-white font-semibold">{defiAction.action}</span></p>
+              <p className="text-xs text-gray-500 mt-2">
+                {defiAction.action === "Lend" 
+                  ? "You will supply tokens and earn interest based on protocol rates"
+                  : "You will borrow tokens using your supplied assets as collateral"
+                }
+              </p>
+            </div>
+            <Button 
+              type="submit" 
+              className="w-full btn-primary" 
+              data-testid="defi-submit-btn"
+            >
+              Preview {defiAction.action}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
