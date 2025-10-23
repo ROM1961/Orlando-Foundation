@@ -83,21 +83,25 @@ class MultiTokenManager:
             
             # Custom price feed (ACS)
             if token_symbol == "ACS":
-                price_feed_abi = [
-                    {
-                        "inputs": [],
-                        "name": "getCurrentPrice",
-                        "outputs": [{"internalType": "int256", "name": "", "type": "int256"}],
-                        "stateMutability": "view",
-                        "type": "function"
-                    }
-                ]
-                contract = self.w3.eth.contract(
-                    address=token_info["price_feed"],
-                    abi=price_feed_abi
-                )
-                price = contract.functions.getCurrentPrice().call()
-                return float(price) / 10**8
+                try:
+                    price_feed_abi = [
+                        {
+                            "inputs": [],
+                            "name": "getCurrentPrice",
+                            "outputs": [{"internalType": "int256", "name": "", "type": "int256"}],
+                            "stateMutability": "view",
+                            "type": "function"
+                        }
+                    ]
+                    contract = self.w3.eth.contract(
+                        address=token_info["price_feed"],
+                        abi=price_feed_abi
+                    )
+                    price = contract.functions.getCurrentPrice().call()
+                    return float(price) / 10**8
+                except Exception as e:
+                    logging.debug(f"ACS price feed contract failed, using fallback: {e}")
+                    return 0.78  # Fallback price for ACS
             
             # CoinGecko for others
             if token_info.get("coingecko_id"):
