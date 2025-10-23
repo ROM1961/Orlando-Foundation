@@ -395,6 +395,111 @@ async def get_protocols():
         {"name": "Euler V2", "address": EULER_ADDRESSES["EVC"], "type": "governed_vaults"}
     ]
 
+@api_router.post("/defi/transaction")
+async def execute_defi_transaction(defi_tx: DeFiTransaction, user_id: str = Depends(get_current_user)):
+    """Execute Aave or Compound lending/borrowing transaction"""
+    vault = await db.user_vaults.find_one({"id": defi_tx.vault_id, "user_id": user_id})
+    if not vault:
+        raise HTTPException(status_code=404, detail="Vault not found")
+    
+    # Check if wallet is watch-only
+    if vault['private_key_encrypted'] == b'watch_only_no_private_key':
+        raise HTTPException(status_code=403, detail="Cannot transact from watch-only wallet")
+    
+    # Get token info
+    if defi_tx.token not in TOKEN_CONFIG:
+        raise HTTPException(status_code=400, detail=f"Unsupported token: {defi_tx.token}")
+    
+    token_info = TOKEN_CONFIG[defi_tx.token]
+    asset_address = token_info.get("address")
+    
+    # For native ETH, we need to handle differently
+    if defi_tx.token == "ETH":
+        # Use WETH for DeFi protocols
+        asset_address = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+    
+    if not asset_address:
+        raise HTTPException(status_code=400, detail="Token address not found")
+    
+    # Decrypt private key
+    try:
+        private_key = decrypt_private_key(vault['private_key_encrypted'])
+        account = Account.from_key(private_key)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error decrypting private key: {str(e)}")
+    
+    # Build transaction based on protocol and action
+    try:
+        if defi_tx.protocol.lower() == "aave":
+            if defi_tx.action.lower() == "lend":
+                transaction = aave.build_supply_transaction(
+                    asset_address,
+                    defi_tx.amount,
+                    token_info["decimals"],
+                    vault['vault_address']
+                )
+            elif defi_tx.action.lower() == "borrow":
+                transaction = aave.build_borrow_transaction(
+                    asset_address,
+                    defi_tx.amount,
+                    token_info["decimals"],
+                    vault['vault_address']
+                )
+            else:
+                raise HTTPException(status_code=400, detail="Invalid action. Use 'lend' or 'borrow'")
+        
+        elif defi_tx.protocol.lower() == "compound":
+            if defi_tx.action.lower() == "lend":
+                transaction = compound.build_supply_transaction(
+                    asset_address,
+                    defi_tx.amount,
+                    token_info["decimals"],
+                    vault['vault_address']
+                )
+            else:
+                raise HTTPException(status_code=400, detail="Compound borrow not implemented yet")
+        
+        else:
+            raise HTTPException(status_code=400, detail="Unsupported protocol")
+    
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error building transaction: {str(e)}")
+    
+    # Sign and send transaction
+    try:
+        signed = account.sign_transaction(transaction)
+        tx_hash = w3.eth.send_raw_transaction(signed.raw_transaction)
+        tx_hash_hex = tx_hash.hex()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error sending transaction: {str(e)}")
+    
+    # Store transaction
+    tx_id = str(uuid.uuid4())
+    await db.vault_transactions.insert_one({
+        "id": tx_id,
+        "vault_id": defi_tx.vault_id,
+        "tx_hash": tx_hash_hex,
+        "protocol_name": defi_tx.protocol,
+        "action": defi_tx.action,
+        "token_symbol": defi_tx.token,
+        "token_address": asset_address,
+        "amount": str(defi_tx.amount),
+        "gas_used": "0.0",
+        "status": "pending",
+        "block_number": 0,
+        "timestamp": datetime.now(timezone.utc),
+        "created_at": datetime.now(timezone.utc)
+    })
+    
+    return {
+        "tx_hash": tx_hash_hex,
+        "status": "pending",
+        "protocol": defi_tx.protocol,
+        "action": defi_tx.action,
+        "token": defi_tx.token,
+        "amount": defi_tx.amount
+    }
+
 # Euler V2 endpoints
 @api_router.get("/euler/vaults/{vault_address}/info")
 async def get_euler_vault_info(vault_address: str, account: str):
