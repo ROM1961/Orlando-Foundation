@@ -85,6 +85,13 @@ class SendTransaction(BaseModel):
     amount: float
     token: str = "ETH"
 
+class DeFiTransaction(BaseModel):
+    vault_id: str
+    protocol: str  # "aave" or "compound"
+    action: str  # "lend" or "borrow"
+    token: str
+    amount: float
+
 class VaultBalance(BaseModel):
     vault_address: str
     eth_balance: float
