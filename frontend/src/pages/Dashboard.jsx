@@ -30,8 +30,11 @@ const Dashboard = ({ setIsAuthenticated }) => {
     label: "",
     vault_type: "multi-sig",
     required_signatures: 2,
-    owner_addresses: [""]
+    owner_addresses: [""],
+    private_key: ""  // For importing existing wallet
   });
+  
+  const [importMode, setImportMode] = useState(false);
   
   const [sendTx, setSendTx] = useState({
     to_address: "",
