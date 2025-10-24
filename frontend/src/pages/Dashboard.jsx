@@ -111,11 +111,20 @@ const Dashboard = ({ setIsAuthenticated }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post(`${API}/vaults/create`, newVault, getAuthHeaders());
-      toast.success("Vault created successfully!");
+      // Prepare payload based on import mode
+      const payload = importMode 
+        ? {
+            label: newVault.label,
+            private_key: newVault.private_key  // Send private key for import
+          }
+        : newVault;  // Normal vault creation
+      
+      await axios.post(`${API}/vaults/create`, payload, getAuthHeaders());
+      toast.success(importMode ? "Wallet imported successfully!" : "Vault created successfully!");
       setCreateVaultOpen(false);
+      setImportMode(false);
       fetchVaults();
-      setNewVault({ label: "", vault_type: "multi-sig", required_signatures: 2, owner_addresses: [""] });
+      setNewVault({ label: "", vault_type: "multi-sig", required_signatures: 2, owner_addresses: [""], private_key: "" });
     } catch (error) {
       toast.error(error.response?.data?.detail || "Failed to create vault");
     } finally {
