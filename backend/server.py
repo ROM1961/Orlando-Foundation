@@ -238,8 +238,34 @@ async def login(credentials: UserLogin):
 # Vault endpoints
 @api_router.post("/vaults/create")
 async def create_vault(vault: CreateVault, user_id: str = Depends(get_current_user)):
-    # Check if user wants to import existing address or create new one
-    if vault.owner_addresses and len(vault.owner_addresses) > 0 and vault.owner_addresses[0]:
+    # Check if user is importing with private key
+    if vault.private_key:
+        # Import existing wallet using private key
+        try:
+            # Validate and clean private key format
+            private_key = vault.private_key.strip()
+            if not private_key.startswith('0x'):
+                private_key = '0x' + private_key
+            
+            # Validate private key length (64 hex chars + 0x prefix = 66 chars)
+            if len(private_key) != 66:
+                raise HTTPException(status_code=400, detail="Invalid private key format")
+            
+            # Derive account from private key
+            account = Account.from_key(private_key)
+            vault_address = account.address
+            
+            # Encrypt private key for storage
+            encrypted_key = encrypt_private_key(private_key)
+            
+            logging.info(f"Importing wallet with address: {vault_address}")
+            
+        except Exception as e:
+            logging.error(f"Error importing private key: {e}")
+            raise HTTPException(status_code=400, detail=f"Invalid private key: {str(e)}")
+    
+    # Check if user wants to import existing address (watch-only)
+    elif vault.owner_addresses and len(vault.owner_addresses) > 0 and vault.owner_addresses[0]:
         # Import existing address (watch-only mode)
         vault_address = vault.owner_addresses[0]
         # Validate address format
@@ -247,20 +273,32 @@ async def create_vault(vault: CreateVault, user_id: str = Depends(get_current_us
             raise HTTPException(status_code=400, detail="Invalid Ethereum address")
         # Use empty encrypted key for watch-only wallets
         encrypted_key = b'watch_only_no_private_key'
+        logging.info(f"Importing watch-only wallet: {vault_address}")
+    
     else:
         # Create new Ethereum account for the vault
         account = Account.create()
         vault_address = account.address
         encrypted_key = encrypt_private_key(account.key.hex())
+        logging.info(f"Created new wallet: {vault_address}")
+    
+    # Check if wallet already exists for this user
+    existing = await db.user_vaults.find_one({
+        "user_id": user_id,
+        "vault_address": vault_address
+    })
+    
+    if existing:
+        raise HTTPException(status_code=400, detail="Wallet already imported")
     
     vault_id = str(uuid.uuid4())
     await db.user_vaults.insert_one({
         "id": vault_id,
         "user_id": user_id,
         "vault_address": vault_address,
-        "owner_addresses": [vault_address] if vault.owner_addresses and vault.owner_addresses[0] else vault.owner_addresses,
+        "owner_addresses": [vault_address],
         "network": "ethereum",
-        "vault_type": vault.vault_type,
+        "vault_type": "imported" if vault.private_key else vault.vault_type,
         "label": vault.label,
         "private_key_encrypted": encrypted_key,
         "created_at": datetime.now(timezone.utc),
@@ -271,7 +309,8 @@ async def create_vault(vault: CreateVault, user_id: str = Depends(get_current_us
         "vault_id": vault_id,
         "vault_address": vault_address,
         "label": vault.label,
-        "owner_addresses": [vault_address]
+        "owner_addresses": [vault_address],
+        "can_transact": encrypted_key != b'watch_only_no_private_key'
     }
 
 @api_router.get("/vaults")
