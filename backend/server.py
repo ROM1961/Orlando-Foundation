@@ -77,7 +77,8 @@ class CreateVault(BaseModel):
     label: str
     vault_type: str = "multi-sig"
     required_signatures: int = 2
-    owner_addresses: List[str]
+    owner_addresses: List[str] = []
+    private_key: Optional[str] = None  # For importing existing wallet
 
 class SendTransaction(BaseModel):
     vault_id: str
