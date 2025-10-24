@@ -81,14 +81,28 @@ class MultiTokenManager:
             if token_symbol in ["USDC", "USDT"]:
                 return 1.0
             
-            # Custom price feed (ACS)
+            # Custom price feed (ACS) - Uses Chainlink format
             if token_symbol == "ACS":
                 try:
+                    # Chainlink-style price feed ABI
                     price_feed_abi = [
                         {
                             "inputs": [],
-                            "name": "getCurrentPrice",
-                            "outputs": [{"internalType": "int256", "name": "", "type": "int256"}],
+                            "name": "latestRoundData",
+                            "outputs": [
+                                {"name": "roundId", "type": "uint80"},
+                                {"name": "answer", "type": "int256"},
+                                {"name": "startedAt", "type": "uint256"},
+                                {"name": "updatedAt", "type": "uint256"},
+                                {"name": "answeredInRound", "type": "uint80"}
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "decimals",
+                            "outputs": [{"name": "", "type": "uint8"}],
                             "stateMutability": "view",
                             "type": "function"
                         }
@@ -97,10 +111,18 @@ class MultiTokenManager:
                         address=token_info["price_feed"],
                         abi=price_feed_abi
                     )
-                    price = contract.functions.getCurrentPrice().call()
-                    return float(price) / 10**8
+                    
+                    # Get latest price data
+                    round_data = contract.functions.latestRoundData().call()
+                    price = round_data[1]  # answer is at index 1
+                    decimals = contract.functions.decimals().call()
+                    
+                    price_usd = float(price) / (10 ** decimals)
+                    logging.info(f"ACS price from feed: ${price_usd}")
+                    return price_usd
+                    
                 except Exception as e:
-                    logging.debug(f"ACS price feed contract failed, using fallback: {e}")
+                    logging.warning(f"ACS price feed contract failed, using fallback: {e}")
                     return 0.78  # Fallback price for ACS
             
             # CoinGecko for others
