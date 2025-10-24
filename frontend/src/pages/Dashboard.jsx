@@ -217,42 +217,110 @@ const Dashboard = ({ setIsAuthenticated }) => {
                   </DialogTrigger>
                   <DialogContent className="bg-slate-900 border-slate-700 text-white">
                     <DialogHeader>
-                      <DialogTitle>Create New Vault</DialogTitle>
+                      <DialogTitle>{importMode ? "Import Existing Wallet" : "Create New Vault"}</DialogTitle>
                       <DialogDescription className="text-gray-400">
-                        Set up a new multi-signature vault
+                        {importMode 
+                          ? "Import your wallet using a private key" 
+                          : "Create a new wallet or import an existing one"}
                       </DialogDescription>
                     </DialogHeader>
+                    
+                    {/* Toggle between Create and Import */}
+                    <div className="flex gap-2 mb-4">
+                      <Button
+                        type="button"
+                        onClick={() => setImportMode(false)}
+                        className={`flex-1 ${!importMode ? 'bg-blue-600' : 'bg-slate-700'}`}
+                        data-testid="create-mode-btn"
+                      >
+                        Create New
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={() => setImportMode(true)}
+                        className={`flex-1 ${importMode ? 'bg-blue-600' : 'bg-slate-700'}`}
+                        data-testid="import-mode-btn"
+                      >
+                        Import Wallet
+                      </Button>
+                    </div>
+                    
                     <form onSubmit={handleCreateVault} className="space-y-4">
                       <div>
-                        <Label htmlFor="label" className="text-gray-300">Vault Label</Label>
+                        <Label htmlFor="label" className="text-gray-300">Wallet Label</Label>
                         <Input
                           id="label"
                           value={newVault.label}
                           onChange={(e) => setNewVault({ ...newVault, label: e.target.value })}
-                          placeholder="My Trading Vault"
+                          placeholder={importMode ? "ACS Owner Wallet" : "My Trading Vault"}
                           required
                           className="bg-slate-800 border-slate-600 text-white"
                           data-testid="vault-label-input"
                         />
                       </div>
-                      <div>
-                        <Label className="text-gray-300">Owner Addresses</Label>
-                        {newVault.owner_addresses.map((addr, idx) => (
-                          <Input
-                            key={idx}
-                            value={addr}
-                            onChange={(e) => updateOwnerAddress(idx, e.target.value)}
-                            placeholder="0x..."
-                            className="bg-slate-800 border-slate-600 text-white mb-2"
-                            data-testid={`owner-address-input-${idx}`}
-                          />
-                        ))}
-                        <Button type="button" onClick={addOwnerAddress} size="sm" variant="outline" className="border-slate-600 text-white">
-                          Add Owner
-                        </Button>
-                      </div>
-                      <Button type="submit" className="w-full btn-primary" disabled={loading} data-testid="create-vault-submit-btn">
-                        {loading ? "Creating..." : "Create Vault"}
+                      
+                      {importMode ? (
+                        <>
+                          {/* Import Mode - Private Key Input */}
+                          <div>
+                            <Label htmlFor="private_key" className="text-gray-300">Private Key</Label>
+                            <Input
+                              id="private_key"
+                              type="password"
+                              value={newVault.private_key}
+                              onChange={(e) => setNewVault({ ...newVault, private_key: e.target.value })}
+                              placeholder="0x..."
+                              required
+                              className="bg-slate-800 border-slate-600 text-white font-mono"
+                              data-testid="private-key-input"
+                            />
+                            <p className="text-xs text-yellow-500 mt-2">
+                              ⚠️ Your private key will be encrypted before storage
+                            </p>
+                          </div>
+                          
+                          <div className="bg-slate-800/50 p-3 rounded-lg border border-yellow-500/30">
+                            <p className="text-xs text-yellow-400 mb-2">🔒 Security Notice:</p>
+                            <ul className="text-xs text-gray-400 space-y-1 list-disc list-inside">
+                              <li>Private key is encrypted with AES-128</li>
+                              <li>Never share your private key with anyone</li>
+                              <li>Test with small amounts first</li>
+                              <li>Consider using hardware wallet for large amounts</li>
+                            </ul>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          {/* Create Mode - Owner Addresses */}
+                          <div>
+                            <Label className="text-gray-300">Owner Addresses (Optional)</Label>
+                            <p className="text-xs text-gray-500 mb-2">Leave empty to generate new wallet</p>
+                            {newVault.owner_addresses.map((addr, idx) => (
+                              <Input
+                                key={idx}
+                                value={addr}
+                                onChange={(e) => updateOwnerAddress(idx, e.target.value)}
+                                placeholder="0x... (optional - for watch-only)"
+                                className="bg-slate-800 border-slate-600 text-white mb-2"
+                                data-testid={`owner-address-input-${idx}`}
+                              />
+                            ))}
+                            <Button type="button" onClick={addOwnerAddress} size="sm" variant="outline" className="border-slate-600 text-white">
+                              Add Owner
+                            </Button>
+                          </div>
+                        </>
+                      )}
+                      
+                      <Button 
+                        type="submit" 
+                        className="w-full btn-primary" 
+                        disabled={loading} 
+                        data-testid="create-vault-submit-btn"
+                      >
+                        {loading 
+                          ? (importMode ? "Importing..." : "Creating...") 
+                          : (importMode ? "Import Wallet" : "Create Vault")}
                       </Button>
                     </form>
                   </DialogContent>
