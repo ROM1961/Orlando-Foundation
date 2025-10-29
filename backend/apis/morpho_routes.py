@@ -18,10 +18,21 @@ from libs.morpho_blue import (
     calculate_market_id
 )
 
-# Import from main server
-from server import get_current_user, db, w3, decrypt_private_key
-
 router = APIRouter(prefix="/morpho", tags=["Morpho Blue"])
+
+# These will be set from server.py
+db = None
+w3 = None
+get_current_user = None
+decrypt_private_key = None
+
+def init_morpho_routes(database, web3_instance, auth_dependency, decrypt_func):
+    """Initialize Morpho routes with dependencies from main server"""
+    global db, w3, get_current_user, decrypt_private_key
+    db = database
+    w3 = web3_instance
+    get_current_user = auth_dependency
+    decrypt_private_key = decrypt_func
 
 # Request/Response Models
 class SupplyCollateralRequest(BaseModel):
