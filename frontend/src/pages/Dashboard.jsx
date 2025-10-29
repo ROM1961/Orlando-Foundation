@@ -625,7 +625,7 @@ const Dashboard = ({ setIsAuthenticated }) => {
                 <Card className="glass-card border-slate-700">
                   <Tabs defaultValue="transactions">
                     <CardHeader>
-                      <TabsList className="grid w-full grid-cols-2">
+                      <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="transactions" data-testid="transactions-tab">
                           <History className="w-4 h-4 mr-2" />
                           Transactions
@@ -633,6 +633,10 @@ const Dashboard = ({ setIsAuthenticated }) => {
                         <TabsTrigger value="defi" data-testid="defi-tab">
                           <TrendingUp className="w-4 h-4 mr-2" />
                           DeFi Protocols
+                        </TabsTrigger>
+                        <TabsTrigger value="bridge" data-testid="bridge-tab">
+                          <GitBranch className="w-4 h-4 mr-2" />
+                          Bridge
                         </TabsTrigger>
                       </TabsList>
                     </CardHeader>
