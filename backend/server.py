@@ -23,6 +23,7 @@ from aave_integration import AaveIntegration, AAVE_ADDRESSES
 from compound_integration import CompoundIntegration, COMPOUND_ADDRESSES
 from apis.morpho_routes import router as morpho_router
 from apis.layerzero_routes import router as layerzero_router
+from apis.mainnet_morpho_routes import router as mainnet_morpho_router
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
