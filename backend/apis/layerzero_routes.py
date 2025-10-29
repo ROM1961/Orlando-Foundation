@@ -112,7 +112,7 @@ async def get_all_balances(user_id: str = Depends(get_current_user_dep())):
 async def get_recent_transactions(
     chain: str,
     limit: int = 10,
-    user_id: str = Depends(get_current_user)
+    user_id: str = Depends(get_current_user_dep())
 ):
     """Get recent relayer transactions on a specific chain"""
     try:
