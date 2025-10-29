@@ -70,8 +70,13 @@ const Dashboard = ({ setIsAuthenticated }) => {
     if (selectedVault) {
       fetchBalance();
       fetchTransactions();
+      fetchMorphoPosition();
     }
   }, [selectedVault]);
+
+  useEffect(() => {
+    fetchMorphoMarketInfo();
+  }, []);
 
   const fetchVaults = async () => {
     try {
