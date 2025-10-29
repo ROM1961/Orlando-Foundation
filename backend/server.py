@@ -438,7 +438,7 @@ async def get_protocols():
 
 @api_router.post("/defi/transaction")
 async def execute_defi_transaction(defi_tx: DeFiTransaction, user_id: str = Depends(get_current_user)):
-    """Execute Aave or Compound lending/borrowing transaction"""
+    """Execute Aave or Compound lending/borrowing/withdrawal/repay transaction"""
     vault = await db.user_vaults.find_one({"id": defi_tx.vault_id, "user_id": user_id})
     if not vault:
         raise HTTPException(status_code=404, detail="Vault not found")
@@ -469,7 +469,78 @@ async def execute_defi_transaction(defi_tx: DeFiTransaction, user_id: str = Depe
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error decrypting private key: {str(e)}")
     
-    # Build transaction based on protocol and action
+    # Determine which protocol contract to use for approvals
+    protocol_address = ""
+    if defi_tx.protocol.lower() == "aave":
+        protocol_address = AAVE_ADDRESSES["Pool"]
+    elif defi_tx.protocol.lower() == "compound":
+        protocol_address = COMPOUND_ADDRESSES["Comet_USDC"]
+    else:
+        raise HTTPException(status_code=400, detail="Unsupported protocol")
+    
+    # Check if approval is needed for supply/lend and repay actions
+    needs_approval = defi_tx.action.lower() in ["lend", "repay"]
+    
+    if needs_approval:
+        # Check current allowance
+        try:
+            if defi_tx.protocol.lower() == "aave":
+                allowance = aave.check_allowance(asset_address, vault['vault_address'], protocol_address)
+            else:
+                allowance = compound.check_allowance(asset_address, vault['vault_address'], protocol_address)
+            
+            amount_units = int(defi_tx.amount * (10 ** token_info["decimals"]))
+            
+            # If allowance is insufficient, build and send approval transaction first
+            if allowance < amount_units:
+                logging.info(f"Insufficient allowance ({allowance} < {amount_units}). Building approval transaction...")
+                
+                if defi_tx.protocol.lower() == "aave":
+                    approval_tx = aave.build_approval_transaction(
+                        asset_address,
+                        protocol_address,
+                        defi_tx.amount,
+                        token_info["decimals"],
+                        vault['vault_address']
+                    )
+                else:
+                    approval_tx = compound.build_approval_transaction(
+                        asset_address,
+                        protocol_address,
+                        defi_tx.amount,
+                        token_info["decimals"],
+                        vault['vault_address']
+                    )
+                
+                # Sign and send approval
+                signed_approval = account.sign_transaction(approval_tx)
+                approval_hash = w3.eth.send_raw_transaction(signed_approval.raw_transaction)
+                
+                # Wait for approval to be mined (optional but recommended)
+                logging.info(f"Approval transaction sent: {approval_hash.hex()}")
+                
+                # Store approval transaction
+                approval_tx_id = str(uuid.uuid4())
+                await db.vault_transactions.insert_one({
+                    "id": approval_tx_id,
+                    "vault_id": defi_tx.vault_id,
+                    "tx_hash": approval_hash.hex(),
+                    "protocol_name": defi_tx.protocol,
+                    "action": "approve",
+                    "token_symbol": defi_tx.token,
+                    "token_address": asset_address,
+                    "amount": str(defi_tx.amount),
+                    "gas_used": "0.0",
+                    "status": "pending",
+                    "block_number": 0,
+                    "timestamp": datetime.now(timezone.utc),
+                    "created_at": datetime.now(timezone.utc)
+                })
+        except Exception as e:
+            logging.warning(f"Error checking/building approval: {e}")
+            # Continue with main transaction, might fail if approval was actually needed
+    
+    # Build main transaction based on protocol and action
     try:
         if defi_tx.protocol.lower() == "aave":
             if defi_tx.action.lower() == "lend":
@@ -486,8 +557,22 @@ async def execute_defi_transaction(defi_tx: DeFiTransaction, user_id: str = Depe
                     token_info["decimals"],
                     vault['vault_address']
                 )
+            elif defi_tx.action.lower() == "withdraw":
+                transaction = aave.build_withdraw_transaction(
+                    asset_address,
+                    defi_tx.amount,
+                    token_info["decimals"],
+                    vault['vault_address']
+                )
+            elif defi_tx.action.lower() == "repay":
+                transaction = aave.build_repay_transaction(
+                    asset_address,
+                    defi_tx.amount,
+                    token_info["decimals"],
+                    vault['vault_address']
+                )
             else:
-                raise HTTPException(status_code=400, detail="Invalid action. Use 'lend' or 'borrow'")
+                raise HTTPException(status_code=400, detail=f"Invalid action for Aave: {defi_tx.action}")
         
         elif defi_tx.protocol.lower() == "compound":
             if defi_tx.action.lower() == "lend":
@@ -497,8 +582,29 @@ async def execute_defi_transaction(defi_tx: DeFiTransaction, user_id: str = Depe
                     token_info["decimals"],
                     vault['vault_address']
                 )
+            elif defi_tx.action.lower() == "borrow":
+                transaction = compound.build_borrow_transaction(
+                    asset_address,
+                    defi_tx.amount,
+                    token_info["decimals"],
+                    vault['vault_address']
+                )
+            elif defi_tx.action.lower() == "withdraw":
+                transaction = compound.build_withdraw_transaction(
+                    asset_address,
+                    defi_tx.amount,
+                    token_info["decimals"],
+                    vault['vault_address']
+                )
+            elif defi_tx.action.lower() == "repay":
+                transaction = compound.build_repay_transaction(
+                    asset_address,
+                    defi_tx.amount,
+                    token_info["decimals"],
+                    vault['vault_address']
+                )
             else:
-                raise HTTPException(status_code=400, detail="Compound borrow not implemented yet")
+                raise HTTPException(status_code=400, detail=f"Invalid action for Compound: {defi_tx.action}")
         
         else:
             raise HTTPException(status_code=400, detail="Unsupported protocol")
@@ -506,7 +612,7 @@ async def execute_defi_transaction(defi_tx: DeFiTransaction, user_id: str = Depe
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error building transaction: {str(e)}")
     
-    # Sign and send transaction
+    # Sign and send main transaction
     try:
         signed = account.sign_transaction(transaction)
         tx_hash = w3.eth.send_raw_transaction(signed.raw_transaction)
