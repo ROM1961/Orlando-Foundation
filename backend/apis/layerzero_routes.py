@@ -80,7 +80,7 @@ async def get_relayer_status(user_id: str = Depends(get_current_user_dep())):
 
 
 @router.get("/relayer/balance/{chain}", response_model=ChainBalanceResponse)
-async def get_balance_on_chain(chain: str, user_id: str = Depends(get_current_user)):
+async def get_balance_on_chain(chain: str, user_id: str = Depends(get_current_user_dep())):
     """Get relayer balance on a specific chain"""
     try:
         balance_info = relayer.get_balance_on_chain(chain)
