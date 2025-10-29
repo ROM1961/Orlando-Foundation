@@ -74,7 +74,13 @@ const Dashboard = ({ setIsAuthenticated }) => {
         setSelectedVault(response.data[0]);
       }
     } catch (error) {
-      toast.error("Failed to fetch vaults");
+      console.error("Vault fetch error:", error);
+      if (error.response?.status === 401) {
+        toast.error("Session expired. Please login again.");
+        setTimeout(() => window.location.href = "/", 2000);
+      } else {
+        toast.error(error.response?.data?.detail || "Failed to fetch vaults");
+      }
     }
   };
 
