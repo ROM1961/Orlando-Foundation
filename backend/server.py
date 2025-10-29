@@ -21,6 +21,7 @@ from multi_token import MultiTokenManager
 from token_config import TOKEN_CONFIG
 from aave_integration import AaveIntegration
 from compound_integration import CompoundIntegration
+from apis.morpho_routes import router as morpho_router
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
