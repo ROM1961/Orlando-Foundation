@@ -357,6 +357,160 @@ async def borrow(request: BorrowRequest, user_id: str = Depends(get_current_user
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.post("/repay", response_model=RepayResponse)
+async def repay(request: RepayRequest, user_id: str = Depends(get_current_user)):
+    """Repay USDC debt in Morpho Blue"""
+    try:
+        # Get vault
+        vault = await db.user_vaults.find_one({"id": request.vault_id, "user_id": user_id})
+        if not vault:
+            raise HTTPException(status_code=404, detail="Vault not found")
+        
+        if vault['private_key_encrypted'] == b'watch_only_no_private_key':
+            raise HTTPException(status_code=403, detail="Cannot transact from watch-only wallet")
+        
+        private_key = decrypt_private_key(vault['private_key_encrypted'])
+        account = Account.from_key(private_key)
+        
+        market_params = DEFAULT_ACS_USDC_MARKET
+        
+        # USDC has 6 decimals
+        amount_in_smallest_unit = int(request.amount * 1e6)
+        
+        # Step 1: Approve Morpho Blue to spend USDC tokens
+        usdc_contract = w3.eth.contract(
+            address=Web3.to_checksum_address(USDC_ADDRESS),
+            abi=ERC20_ABI
+        )
+        
+        allowance = usdc_contract.functions.allowance(
+            account.address,
+            Web3.to_checksum_address(MORPHO_BLUE_ADDRESS)
+        ).call()
+        
+        if allowance < amount_in_smallest_unit:
+            approve_tx = usdc_contract.functions.approve(
+                Web3.to_checksum_address(MORPHO_BLUE_ADDRESS),
+                amount_in_smallest_unit
+            ).build_transaction({
+                'from': account.address,
+                'nonce': w3.eth.get_transaction_count(account.address),
+                'gas': 100000,
+                'gasPrice': w3.eth.gas_price,
+                'chainId': 1
+            })
+            
+            signed_approve = w3.eth.account.sign_transaction(approve_tx, private_key)
+            approve_hash = w3.eth.send_raw_transaction(signed_approve.raw_transaction)
+            w3.eth.wait_for_transaction_receipt(approve_hash)
+            logging.info(f"Approved Morpho Blue to spend USDC: {approve_hash.hex()}")
+        
+        # Step 2: Repay debt
+        morpho_contract = w3.eth.contract(
+            address=Web3.to_checksum_address(MORPHO_BLUE_ADDRESS),
+            abi=MORPHO_BLUE_ABI
+        )
+        
+        market_params_tuple = (
+            Web3.to_checksum_address(market_params['loanToken']),
+            Web3.to_checksum_address(market_params['collateralToken']),
+            Web3.to_checksum_address(market_params['oracle']),
+            Web3.to_checksum_address(market_params['irm']),
+            market_params['lltv']
+        )
+        
+        repay_tx = morpho_contract.functions.repay(
+            market_params_tuple,
+            amount_in_smallest_unit,
+            0,  # shares (0 means use assets)
+            account.address,  # onBehalf
+            b''  # empty data
+        ).build_transaction({
+            'from': account.address,
+            'nonce': w3.eth.get_transaction_count(account.address),
+            'gas': 300000,
+            'gasPrice': w3.eth.gas_price,
+            'chainId': 1
+        })
+        
+        signed_tx = w3.eth.account.sign_transaction(repay_tx, private_key)
+        tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
+        
+        logging.info(f"Morpho Blue repay: {tx_hash.hex()}")
+        
+        return RepayResponse(
+            success=True,
+            message=f"Successfully repaid {request.amount} USDC",
+            transaction_hash=tx_hash.hex()
+        )
+        
+    except Exception as e:
+        logging.error(f"Error repaying: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/withdraw-collateral", response_model=WithdrawCollateralResponse)
+async def withdraw_collateral(request: WithdrawCollateralRequest, user_id: str = Depends(get_current_user)):
+    """Withdraw ACS collateral from Morpho Blue"""
+    try:
+        # Get vault
+        vault = await db.user_vaults.find_one({"id": request.vault_id, "user_id": user_id})
+        if not vault:
+            raise HTTPException(status_code=404, detail="Vault not found")
+        
+        if vault['private_key_encrypted'] == b'watch_only_no_private_key':
+            raise HTTPException(status_code=403, detail="Cannot transact from watch-only wallet")
+        
+        private_key = decrypt_private_key(vault['private_key_encrypted'])
+        account = Account.from_key(private_key)
+        
+        market_params = DEFAULT_ACS_USDC_MARKET
+        
+        # Convert amount to wei (ACS has 18 decimals)
+        amount_in_wei = int(request.amount * 1e18)
+        
+        morpho_contract = w3.eth.contract(
+            address=Web3.to_checksum_address(MORPHO_BLUE_ADDRESS),
+            abi=MORPHO_BLUE_ABI
+        )
+        
+        market_params_tuple = (
+            Web3.to_checksum_address(market_params['loanToken']),
+            Web3.to_checksum_address(market_params['collateralToken']),
+            Web3.to_checksum_address(market_params['oracle']),
+            Web3.to_checksum_address(market_params['irm']),
+            market_params['lltv']
+        )
+        
+        withdraw_tx = morpho_contract.functions.withdrawCollateral(
+            market_params_tuple,
+            amount_in_wei,
+            account.address,  # onBehalf
+            account.address   # receiver
+        ).build_transaction({
+            'from': account.address,
+            'nonce': w3.eth.get_transaction_count(account.address),
+            'gas': 300000,
+            'gasPrice': w3.eth.gas_price,
+            'chainId': 1
+        })
+        
+        signed_tx = w3.eth.account.sign_transaction(withdraw_tx, private_key)
+        tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
+        
+        logging.info(f"Morpho Blue withdraw collateral: {tx_hash.hex()}")
+        
+        return WithdrawCollateralResponse(
+            success=True,
+            message=f"Successfully withdrew {request.amount} ACS collateral",
+            transaction_hash=tx_hash.hex()
+        )
+        
+    except Exception as e:
+        logging.error(f"Error withdrawing collateral: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get("/position/{vault_id}", response_model=PositionResponse)
 async def get_position(vault_id: str, user_id: str = Depends(get_current_user)):
     """Get user position in Morpho Blue ACS/USDC market"""
