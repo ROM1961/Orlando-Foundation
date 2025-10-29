@@ -47,6 +47,13 @@ const Dashboard = ({ setIsAuthenticated }) => {
     amount: ""
   });
 
+  // Morpho Blue state
+  const [morphoDialogOpen, setMorphoDialogOpen] = useState(false);
+  const [morphoAction, setMorphoAction] = useState(""); // supply, borrow, repay, withdraw
+  const [morphoAmount, setMorphoAmount] = useState("");
+  const [morphoPosition, setMorphoPosition] = useState(null);
+  const [morphoMarketInfo, setMorphoMarketInfo] = useState(null);
+
   const username = localStorage.getItem("username");
   const token = localStorage.getItem("token");
 
