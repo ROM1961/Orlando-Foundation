@@ -90,7 +90,7 @@ async def get_balance_on_chain(chain: str):
 
 
 @router.get("/relayer/balances")
-async def get_all_balances(user_id: str = Depends(get_current_user_dep())):
+async def get_all_balances():
     """Get relayer balances across all supported chains"""
     try:
         balances = relayer.get_all_balances()
