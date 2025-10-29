@@ -19,12 +19,27 @@ from libs.morpho_blue import (
 )
 
 from apis.morpho_deps import db, w3, decrypt_private_key
-
-# Import auth dependency from server module
-import sys
-sys.path.insert(0, '/app/backend')
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+import jwt
 
 router = APIRouter(prefix="/morpho", tags=["Morpho Blue"])
+
+# Auth setup
+security = HTTPBearer()
+JWT_SECRET = os.environ.get('JWT_SECRET', 'your-secret-key-change-in-production')
+JWT_ALGORITHM = os.environ.get('JWT_ALGORITHM', 'HS256')
+
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Verify JWT token and return user_id"""
+    try:
+        token = credentials.credentials
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        user_id = payload.get("sub")
+        if user_id is None:
+            raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+        return user_id
+    except jwt.PyJWTError:
+        raise HTTPException(status_code=401, detail="Invalid authentication credentials")
 
 # Request/Response Models
 class SupplyCollateralRequest(BaseModel):
