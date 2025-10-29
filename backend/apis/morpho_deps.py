@@ -12,8 +12,14 @@ DB_NAME = os.environ.get('DB_NAME', 'vault_wallet')
 mongo_client = AsyncIOMotorClient(MONGO_URL)
 db = mongo_client[DB_NAME]
 
-# Web3 connection
+# Web3 connection - Load from dotenv if needed
+from dotenv import load_dotenv
+load_dotenv('/app/backend/.env')
+
 ALCHEMY_API_KEY = os.environ.get('ALCHEMY_API_KEY')
+if not ALCHEMY_API_KEY:
+    raise ValueError("ALCHEMY_API_KEY not found in environment")
+
 w3 = Web3(HTTPProvider(f'https://eth-mainnet.g.alchemy.com/v2/{ALCHEMY_API_KEY}'))
 
 # Decryption
