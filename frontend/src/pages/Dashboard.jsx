@@ -125,6 +125,81 @@ const Dashboard = ({ setIsAuthenticated }) => {
     }
   };
 
+  const fetchMorphoPosition = async () => {
+    if (!selectedVault) return;
+    try {
+      const response = await axios.get(`${API}/morpho/position/${selectedVault.id}`, getAuthHeaders());
+      setMorphoPosition(response.data);
+    } catch (error) {
+      console.error("Failed to fetch Morpho position:", error);
+    }
+  };
+
+  const fetchMorphoMarketInfo = async () => {
+    try {
+      const response = await axios.get(`${API}/morpho/market-info`, getAuthHeaders());
+      setMorphoMarketInfo(response.data);
+    } catch (error) {
+      console.error("Failed to fetch Morpho market info:", error);
+    }
+  };
+
+  const handleMorphoAction = async (e) => {
+    e.preventDefault();
+    if (!selectedVault) {
+      toast.error("Please select a vault first");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      let endpoint = "";
+      let requestData = {
+        vault_id: selectedVault.id,
+        amount: parseFloat(morphoAmount)
+      };
+
+      switch (morphoAction) {
+        case "supply":
+          endpoint = "/morpho/supply-collateral";
+          break;
+        case "borrow":
+          endpoint = "/morpho/borrow";
+          break;
+        case "repay":
+          endpoint = "/morpho/repay";
+          break;
+        case "withdraw":
+          endpoint = "/morpho/withdraw-collateral";
+          break;
+        default:
+          throw new Error("Invalid action");
+      }
+
+      const response = await axios.post(`${API}${endpoint}`, requestData, getAuthHeaders());
+      
+      toast.success(
+        `${morphoAction.charAt(0).toUpperCase() + morphoAction.slice(1)} successful! Hash: ${response.data.transaction_hash.substring(0, 10)}...`,
+        { duration: 7000 }
+      );
+      
+      setMorphoDialogOpen(false);
+      setMorphoAmount("");
+      fetchBalance();
+      fetchMorphoPosition();
+      fetchTransactions();
+    } catch (error) {
+      const errorMsg = error.response?.data?.detail || `${morphoAction} failed`;
+      if (errorMsg.includes("watch") || errorMsg.includes("private key")) {
+        toast.error("Cannot transact: This is a watch-only wallet. Create a new wallet to execute transactions.");
+      } else {
+        toast.error(errorMsg);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleCreateVault = async (e) => {
     e.preventDefault();
     setLoading(true);
