@@ -388,8 +388,13 @@ const Dashboard = ({ setIsAuthenticated }) => {
                               <TrendingUp className="w-4 h-4 text-purple-400" />
                               <span className="text-gray-400 text-sm">ACS Token</span>
                             </div>
-                            <p className="text-2xl font-bold text-white">{balance.acs_balance?.toFixed(2) || 0} ACS</p>
-                            <p className="text-sm text-gray-400">${balance.acs_usd?.toFixed(2) || 0}</p>
+                            <p className="text-2xl font-bold text-white">{balance.acs_balance?.toLocaleString() || 0} ACS</p>
+                            <p className="text-sm text-green-400 font-semibold">${balance.acs_usd?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) || 0}</p>
+                            {balance.prices?.ETH > 0 && balance.acs_usd > 0 && (
+                              <p className="text-xs text-blue-400 mt-1">
+                                ≈ {(balance.acs_usd / balance.prices.ETH).toFixed(4)} ETH
+                              </p>
+                            )}
                           </div>
 
                           <div className="bg-slate-800/50 p-4 rounded-lg" data-testid="usdc-balance">
