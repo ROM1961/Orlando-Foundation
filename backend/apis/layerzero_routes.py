@@ -128,7 +128,7 @@ async def get_recent_transactions(
 
 
 @router.get("/chains")
-async def get_supported_chains(user_id: str = Depends(get_current_user)):
+async def get_supported_chains(user_id: str = Depends(get_current_user_dep())):
     """Get list of all supported chains"""
     try:
         from layerzero_relayer import CHAIN_CONFIG
