@@ -69,6 +69,8 @@ const Dashboard = ({ setIsAuthenticated }) => {
   useEffect(() => {
     fetchVaults();
     fetchProtocols();
+    fetchSupportedChains();
+    fetchRelayerStatus();
   }, []);
 
   useEffect(() => {
