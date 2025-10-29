@@ -887,6 +887,106 @@ const Dashboard = ({ setIsAuthenticated }) => {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Morpho Blue Dialog */}
+      <Dialog open={morphoDialogOpen} onOpenChange={setMorphoDialogOpen}>
+        <DialogContent className="bg-slate-900 border-slate-700 text-white">
+          <DialogHeader>
+            <DialogTitle>Morpho Blue - {morphoAction.charAt(0).toUpperCase() + morphoAction.slice(1)}</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              {morphoAction === "supply" && "Supply ACS tokens as collateral to borrow USDC"}
+              {morphoAction === "borrow" && "Borrow USDC against your ACS collateral"}
+              {morphoAction === "repay" && "Repay your USDC debt"}
+              {morphoAction === "withdraw" && "Withdraw your ACS collateral"}
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleMorphoAction} className="space-y-4">
+            <div>
+              <Label htmlFor="morpho_amount" className="text-gray-300">
+                Amount ({morphoAction === "supply" || morphoAction === "withdraw" ? "ACS" : "USDC"})
+              </Label>
+              <Input
+                id="morpho_amount"
+                type="number"
+                step="0.01"
+                value={morphoAmount}
+                onChange={(e) => setMorphoAmount(e.target.value)}
+                placeholder="0.0"
+                required
+                className="bg-slate-800 border-slate-600 text-white"
+                data-testid="morpho-amount-input"
+              />
+              {balance && (
+                <p className="text-xs text-gray-400 mt-1">
+                  Available: {
+                    (morphoAction === "supply" || morphoAction === "withdraw")
+                      ? balance.acs_balance?.toFixed(2) 
+                      : balance.balances?.USDC?.toFixed(2) || 0
+                  } {(morphoAction === "supply" || morphoAction === "withdraw") ? "ACS" : "USDC"}
+                </p>
+              )}
+            </div>
+            
+            {/* Position Summary */}
+            {morphoPosition && (
+              <div className="bg-slate-800/50 p-3 rounded-lg space-y-2">
+                <p className="text-sm font-semibold text-gray-300">Current Position</p>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <p className="text-gray-400">Collateral</p>
+                    <p className="text-white font-semibold">{morphoPosition.collateral_formatted.toFixed(2)} ACS</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400">Debt</p>
+                    <p className="text-white font-semibold">{morphoPosition.borrow_formatted.toFixed(2)} USDC</p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Market Info */}
+            {morphoMarketInfo && (
+              <div className="bg-purple-900/20 p-3 rounded-lg border border-purple-500/30">
+                <p className="text-xs text-gray-300 mb-2">Market Information</p>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <p className="text-gray-400">Total Supply</p>
+                    <p className="text-white">{morphoMarketInfo.total_supply_assets.toFixed(0)} USDC</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400">Utilization</p>
+                    <p className="text-white">{morphoMarketInfo.utilization_rate.toFixed(1)}%</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400">Max LTV</p>
+                    <p className="text-white">{morphoMarketInfo.lltv.toFixed(0)}%</p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            <div className="bg-slate-800/50 p-3 rounded-lg">
+              <p className="text-sm text-gray-300 mb-1">Protocol: <span className="text-white font-semibold">Morpho Blue</span></p>
+              <p className="text-sm text-gray-300">Action: <span className="text-white font-semibold">{morphoAction.charAt(0).toUpperCase() + morphoAction.slice(1)}</span></p>
+              <p className="text-xs text-gray-500 mt-2">
+                {morphoAction === "supply" && "Supply ACS as collateral to enable USDC borrowing"}
+                {morphoAction === "borrow" && "Borrow USDC up to your collateral limit"}
+                {morphoAction === "repay" && "Reduce your debt and free up collateral"}
+                {morphoAction === "withdraw" && "Withdraw collateral (requires sufficient health factor)"}
+              </p>
+            </div>
+            
+            <Button 
+              type="submit" 
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white" 
+              disabled={loading}
+              data-testid="morpho-submit-btn"
+            >
+              {loading ? "Processing..." : `Execute ${morphoAction.charAt(0).toUpperCase() + morphoAction.slice(1)}`}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
