@@ -54,6 +54,11 @@ const Dashboard = ({ setIsAuthenticated }) => {
   const [morphoPosition, setMorphoPosition] = useState(null);
   const [morphoMarketInfo, setMorphoMarketInfo] = useState(null);
 
+  // LayerZero Relayer state
+  const [relayerStatus, setRelayerStatus] = useState(null);
+  const [relayerBalances, setRelayerBalances] = useState([]);
+  const [supportedChains, setSupportedChains] = useState([]);
+
   const username = localStorage.getItem("username");
   const token = localStorage.getItem("token");
 
