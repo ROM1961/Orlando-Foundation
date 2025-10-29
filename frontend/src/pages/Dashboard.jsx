@@ -686,6 +686,84 @@ const Dashboard = ({ setIsAuthenticated }) => {
                               )}
                             </div>
                           ))}
+                          
+                          {/* Morpho Blue Protocol */}
+                          <div className="p-4 bg-gradient-to-r from-purple-900/30 to-blue-900/30 rounded-lg border border-purple-500/30 hover:bg-purple-900/40 transition" data-testid="protocol-morpho">
+                            <div className="flex items-center justify-between mb-3">
+                              <div>
+                                <p className="font-medium text-white">Morpho Blue</p>
+                                <p className="text-xs text-gray-400">ACS Collateral / USDC Borrowing</p>
+                              </div>
+                              <Badge variant="outline" className="border-purple-500 text-purple-400">
+                                Lending Market
+                              </Badge>
+                            </div>
+                            
+                            {/* Morpho Position Info */}
+                            {morphoPosition && (
+                              <div className="grid grid-cols-2 gap-2 mb-3 text-xs">
+                                <div className="bg-slate-800/50 p-2 rounded">
+                                  <p className="text-gray-400">Collateral</p>
+                                  <p className="text-white font-semibold">{morphoPosition.collateral_formatted.toFixed(2)} ACS</p>
+                                </div>
+                                <div className="bg-slate-800/50 p-2 rounded">
+                                  <p className="text-gray-400">Borrowed</p>
+                                  <p className="text-white font-semibold">{morphoPosition.borrow_formatted.toFixed(2)} USDC</p>
+                                </div>
+                              </div>
+                            )}
+                            
+                            <div className="grid grid-cols-2 gap-2">
+                              <Button 
+                                size="sm" 
+                                className="bg-purple-600 hover:bg-purple-700 text-white"
+                                onClick={() => {
+                                  setMorphoAction("supply");
+                                  setMorphoDialogOpen(true);
+                                }}
+                                data-testid="morpho-supply-btn"
+                              >
+                                <Plus className="w-3 h-3 mr-1" />
+                                Supply ACS
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                className="bg-blue-600 hover:bg-blue-700 text-white"
+                                onClick={() => {
+                                  setMorphoAction("borrow");
+                                  setMorphoDialogOpen(true);
+                                }}
+                                data-testid="morpho-borrow-btn"
+                              >
+                                <ArrowDownToLine className="w-3 h-3 mr-1" />
+                                Borrow USDC
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                className="bg-green-600 hover:bg-green-700 text-white"
+                                onClick={() => {
+                                  setMorphoAction("repay");
+                                  setMorphoDialogOpen(true);
+                                }}
+                                data-testid="morpho-repay-btn"
+                              >
+                                <TrendingUp className="w-3 h-3 mr-1" />
+                                Repay USDC
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                className="bg-orange-600 hover:bg-orange-700 text-white"
+                                onClick={() => {
+                                  setMorphoAction("withdraw");
+                                  setMorphoDialogOpen(true);
+                                }}
+                                data-testid="morpho-withdraw-btn"
+                              >
+                                <ArrowDownToLine className="w-3 h-3 mr-1" />
+                                Withdraw ACS
+                              </Button>
+                            </div>
+                          </div>
                         </div>
                       </TabsContent>
                     </CardContent>
