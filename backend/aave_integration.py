@@ -101,6 +101,46 @@ class AaveIntegration:
             abi=AAVE_POOL_ABI
         )
     
+    def check_allowance(self, token_address: str, owner: str, spender: str) -> int:
+        """Check ERC20 allowance for a spender"""
+        try:
+            token_contract = self.w3.eth.contract(address=token_address, abi=ERC20_ABI)
+            allowance = token_contract.functions.allowance(owner, spender).call()
+            return allowance
+        except Exception as e:
+            logging.error(f"Error checking allowance: {e}")
+            return 0
+    
+    def build_approval_transaction(
+        self,
+        token_address: str,
+        spender: str,
+        amount: float,
+        decimals: int,
+        from_address: str
+    ) -> Dict:
+        """Build ERC20 approval transaction"""
+        try:
+            token_contract = self.w3.eth.contract(address=token_address, abi=ERC20_ABI)
+            amount_units = int(amount * (10 ** decimals))
+            nonce = self.w3.eth.get_transaction_count(from_address)
+            
+            transaction = token_contract.functions.approve(
+                spender,
+                amount_units
+            ).build_transaction({
+                'from': from_address,
+                'nonce': nonce,
+                'gas': 100000,
+                'gasPrice': self.w3.eth.gas_price,
+                'chainId': 1
+            })
+            
+            return transaction
+        except Exception as e:
+            logging.error(f"Error building approval transaction: {e}")
+            raise
+    
     def build_supply_transaction(
         self, 
         asset_address: str, 
@@ -129,6 +169,40 @@ class AaveIntegration:
             return transaction
         except Exception as e:
             logging.error(f"Error building Aave supply transaction: {e}")
+            raise
+    
+    def build_withdraw_transaction(
+        self,
+        asset_address: str,
+        amount: float,
+        decimals: int,
+        from_address: str
+    ) -> Dict:
+        """Build Aave withdraw transaction"""
+        try:
+            # Use max uint256 to withdraw all if amount is -1
+            if amount == -1:
+                amount_units = 2**256 - 1
+            else:
+                amount_units = int(amount * (10 ** decimals))
+            
+            nonce = self.w3.eth.get_transaction_count(from_address)
+            
+            transaction = self.pool.functions.withdraw(
+                asset_address,
+                amount_units,
+                from_address
+            ).build_transaction({
+                'from': from_address,
+                'nonce': nonce,
+                'gas': 300000,
+                'gasPrice': self.w3.eth.gas_price,
+                'chainId': 1
+            })
+            
+            return transaction
+        except Exception as e:
+            logging.error(f"Error building Aave withdraw transaction: {e}")
             raise
     
     def build_borrow_transaction(
@@ -161,4 +235,40 @@ class AaveIntegration:
             return transaction
         except Exception as e:
             logging.error(f"Error building Aave borrow transaction: {e}")
+            raise
+    
+    def build_repay_transaction(
+        self,
+        asset_address: str,
+        amount: float,
+        decimals: int,
+        from_address: str,
+        rate_mode: int = 2  # 1 = stable, 2 = variable
+    ) -> Dict:
+        """Build Aave repay transaction"""
+        try:
+            # Use max uint256 to repay all if amount is -1
+            if amount == -1:
+                amount_units = 2**256 - 1
+            else:
+                amount_units = int(amount * (10 ** decimals))
+            
+            nonce = self.w3.eth.get_transaction_count(from_address)
+            
+            transaction = self.pool.functions.repay(
+                asset_address,
+                amount_units,
+                rate_mode,
+                from_address
+            ).build_transaction({
+                'from': from_address,
+                'nonce': nonce,
+                'gas': 300000,
+                'gasPrice': self.w3.eth.gas_price,
+                'chainId': 1
+            })
+            
+            return transaction
+        except Exception as e:
+            logging.error(f"Error building Aave repay transaction: {e}")
             raise
