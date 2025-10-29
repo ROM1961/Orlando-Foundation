@@ -89,6 +89,46 @@ class CompoundIntegration:
             abi=COMPOUND_COMET_ABI
         )
     
+    def check_allowance(self, token_address: str, owner: str, spender: str) -> int:
+        """Check ERC20 allowance for a spender"""
+        try:
+            token_contract = self.w3.eth.contract(address=token_address, abi=ERC20_ABI)
+            allowance = token_contract.functions.allowance(owner, spender).call()
+            return allowance
+        except Exception as e:
+            logging.error(f"Error checking allowance: {e}")
+            return 0
+    
+    def build_approval_transaction(
+        self,
+        token_address: str,
+        spender: str,
+        amount: float,
+        decimals: int,
+        from_address: str
+    ) -> Dict:
+        """Build ERC20 approval transaction"""
+        try:
+            token_contract = self.w3.eth.contract(address=token_address, abi=ERC20_ABI)
+            amount_units = int(amount * (10 ** decimals))
+            nonce = self.w3.eth.get_transaction_count(from_address)
+            
+            transaction = token_contract.functions.approve(
+                spender,
+                amount_units
+            ).build_transaction({
+                'from': from_address,
+                'nonce': nonce,
+                'gas': 100000,
+                'gasPrice': self.w3.eth.gas_price,
+                'chainId': 1
+            })
+            
+            return transaction
+        except Exception as e:
+            logging.error(f"Error building approval transaction: {e}")
+            raise
+    
     def build_supply_transaction(
         self,
         asset_address: str,
@@ -143,6 +183,75 @@ class CompoundIntegration:
             return transaction
         except Exception as e:
             logging.error(f"Error building Compound withdraw transaction: {e}")
+            raise
+    
+    def build_borrow_transaction(
+        self,
+        asset_address: str,
+        amount: float,
+        decimals: int,
+        from_address: str
+    ) -> Dict:
+        """
+        Build Compound V3 borrow transaction.
+        In Compound V3, borrowing base asset (USDC) is done by withdrawing negative balance.
+        """
+        try:
+            amount_units = int(amount * (10 ** decimals))
+            nonce = self.w3.eth.get_transaction_count(from_address)
+            
+            # In Compound V3, borrowing is withdrawing the base asset
+            transaction = self.comet.functions.withdraw(
+                asset_address,
+                amount_units
+            ).build_transaction({
+                'from': from_address,
+                'nonce': nonce,
+                'gas': 350000,
+                'gasPrice': self.w3.eth.gas_price,
+                'chainId': 1
+            })
+            
+            return transaction
+        except Exception as e:
+            logging.error(f"Error building Compound borrow transaction: {e}")
+            raise
+    
+    def build_repay_transaction(
+        self,
+        asset_address: str,
+        amount: float,
+        decimals: int,
+        from_address: str
+    ) -> Dict:
+        """
+        Build Compound V3 repay transaction.
+        In Compound V3, repaying debt is done by supplying base asset.
+        """
+        try:
+            # Use max amount to repay all if amount is -1
+            if amount == -1:
+                amount_units = 2**256 - 1
+            else:
+                amount_units = int(amount * (10 ** decimals))
+            
+            nonce = self.w3.eth.get_transaction_count(from_address)
+            
+            # In Compound V3, repaying is supplying the base asset
+            transaction = self.comet.functions.supply(
+                asset_address,
+                amount_units
+            ).build_transaction({
+                'from': from_address,
+                'nonce': nonce,
+                'gas': 300000,
+                'gasPrice': self.w3.eth.gas_price,
+                'chainId': 1
+            })
+            
+            return transaction
+        except Exception as e:
+            logging.error(f"Error building Compound repay transaction: {e}")
             raise
     
     def get_supplied_balance(self, account_address: str) -> float:
