@@ -53,7 +53,7 @@ class TransactionResponse(BaseModel):
 
 
 @router.get("/relayer/info", response_model=RelayerInfoResponse)
-async def get_relayer_info(user_id: str = Depends(get_current_user_dep())):
+async def get_relayer_info():
     """Get basic relayer information"""
     try:
         info = relayer.get_relayer_info()
