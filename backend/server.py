@@ -19,8 +19,8 @@ import base64
 from euler_integration import EulerV2Integration, EULER_ADDRESSES
 from multi_token import MultiTokenManager
 from token_config import TOKEN_CONFIG
-from aave_integration import AaveIntegration
-from compound_integration import CompoundIntegration
+from aave_integration import AaveIntegration, AAVE_ADDRESSES
+from compound_integration import CompoundIntegration, COMPOUND_ADDRESSES
 from apis.morpho_routes import router as morpho_router
 
 ROOT_DIR = Path(__file__).parent
