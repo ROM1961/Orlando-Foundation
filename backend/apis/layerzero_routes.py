@@ -104,11 +104,7 @@ async def get_all_balances():
 
 
 @router.get("/relayer/transactions/{chain}")
-async def get_recent_transactions(
-    chain: str,
-    limit: int = 10,
-    user_id: str = Depends(get_current_user_dep())
-):
+async def get_recent_transactions(chain: str, limit: int = 10):
     """Get recent relayer transactions on a specific chain"""
     try:
         transactions = relayer.get_recent_transactions(chain, limit)
