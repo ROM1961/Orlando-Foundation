@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Wallet, Send, ArrowDownToLine, History, LogOut, Plus, TrendingUp, DollarSign } from "lucide-react";
+import { Wallet, Send, ArrowDownToLine, History, LogOut, Plus, TrendingUp, DollarSign, GitBranch } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
