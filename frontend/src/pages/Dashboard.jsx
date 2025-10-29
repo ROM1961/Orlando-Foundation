@@ -796,6 +796,95 @@ const Dashboard = ({ setIsAuthenticated }) => {
                           </div>
                         </div>
                       </TabsContent>
+                      
+                      <TabsContent value="bridge" className="mt-0">
+                        <div className="space-y-4">
+                          {/* Relayer Status Card */}
+                          {relayerStatus && (
+                            <div className="p-4 bg-gradient-to-r from-indigo-900/30 to-purple-900/30 rounded-lg border border-indigo-500/30">
+                              <div className="flex items-center justify-between mb-3">
+                                <div>
+                                  <p className="font-medium text-white">LayerZero Relayer</p>
+                                  <p className="text-xs text-gray-400">{relayerStatus.address?.substring(0, 10)}...{relayerStatus.address?.substring(38)}</p>
+                                </div>
+                                <Badge 
+                                  variant="outline" 
+                                  className={
+                                    relayerStatus.health === "healthy" 
+                                      ? "border-green-500 text-green-400" 
+                                      : "border-yellow-500 text-yellow-400"
+                                  }
+                                >
+                                  {relayerStatus.status}
+                                </Badge>
+                              </div>
+                              
+                              <div className="grid grid-cols-2 gap-2 text-xs">
+                                <div className="bg-slate-800/50 p-2 rounded">
+                                  <p className="text-gray-400">Total Balance</p>
+                                  <p className="text-white font-semibold">{relayerStatus.total_native_balance} ETH/SOL</p>
+                                </div>
+                                <div className="bg-slate-800/50 p-2 rounded">
+                                  <p className="text-gray-400">Health</p>
+                                  <p className="text-white font-semibold capitalize">{relayerStatus.health}</p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Chain Balances */}
+                          <div className="space-y-2">
+                            <p className="text-sm font-semibold text-gray-300">Chain Balances</p>
+                            {relayerBalances.map((chainBalance) => (
+                              <div
+                                key={chainBalance.chain}
+                                className="p-3 bg-slate-800/30 rounded-lg hover:bg-slate-800/50 transition"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex-1">
+                                    <p className="font-medium text-white">{chainBalance.chain_name || chainBalance.chain}</p>
+                                    <p className="text-xs text-gray-400">{chainBalance.native_token}</p>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="text-white font-semibold">{chainBalance.balance_formatted}</p>
+                                    <p className="text-xs text-gray-400">{chainBalance.native_token}</p>
+                                  </div>
+                                </div>
+                                
+                                {chainBalance.error && (
+                                  <p className="text-xs text-red-400 mt-1">Error: {chainBalance.error}</p>
+                                )}
+                                
+                                {chainBalance.explorer_url && (
+                                  <a 
+                                    href={chainBalance.explorer_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-xs text-blue-400 hover:text-blue-300 mt-1 inline-block"
+                                  >
+                                    View on Explorer →
+                                  </a>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                          
+                          {/* Supported Chains Info */}
+                          {supportedChains.length > 0 && (
+                            <div className="p-3 bg-indigo-900/20 rounded-lg border border-indigo-500/30">
+                              <p className="text-sm font-semibold text-gray-300 mb-2">Supported Chains</p>
+                              <div className="grid grid-cols-3 gap-2">
+                                {supportedChains.map((chain) => (
+                                  <div key={chain.key} className="text-center">
+                                    <p className="text-xs font-medium text-white">{chain.name}</p>
+                                    <p className="text-xs text-gray-400">{chain.native_token}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </TabsContent>
                     </CardContent>
                   </Tabs>
                 </Card>
