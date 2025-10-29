@@ -101,3 +101,234 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: |
+  Implement complete Aave and Compound DeFi protocol integrations for the multi-token wallet.
+  Required functionality:
+  - Aave: lend, borrow, withdraw, repay
+  - Compound: lend, borrow, withdraw, repay
+  - ERC20 token approval handling
+  - Transaction building and execution
+  - Support for USDC, USDT, ETH (WETH) tokens
+
+backend:
+  - task: "Aave Integration - Supply/Lend"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/aave_integration.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented build_supply_transaction() method with ERC20 approval checking"
+
+  - task: "Aave Integration - Borrow"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/aave_integration.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented build_borrow_transaction() method with variable rate mode default"
+
+  - task: "Aave Integration - Withdraw"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/aave_integration.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented build_withdraw_transaction() method with support for max withdrawal (-1)"
+
+  - task: "Aave Integration - Repay"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/aave_integration.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented build_repay_transaction() method with support for full repayment (-1) and ERC20 approval"
+
+  - task: "Aave Integration - ERC20 Approvals"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/aave_integration.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented check_allowance() and build_approval_transaction() methods for ERC20 tokens"
+
+  - task: "Compound Integration - Supply/Lend"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/compound_integration.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented build_supply_transaction() method with ERC20 approval checking"
+
+  - task: "Compound Integration - Borrow"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/compound_integration.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented build_borrow_transaction() method - Compound V3 borrows via withdraw of base asset"
+
+  - task: "Compound Integration - Withdraw"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/compound_integration.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented build_withdraw_transaction() method for Compound V3"
+
+  - task: "Compound Integration - Repay"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/compound_integration.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented build_repay_transaction() method - Compound V3 repays via supply of base asset"
+
+  - task: "Compound Integration - ERC20 Approvals"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/compound_integration.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented check_allowance() and build_approval_transaction() methods for ERC20 tokens"
+
+  - task: "DeFi Transaction API Endpoint"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Enhanced /api/defi/transaction endpoint to support lend, borrow, withdraw, repay for both Aave and Compound. Includes automatic approval handling before supply/repay actions"
+
+frontend:
+  - task: "Aave Lend/Borrow UI"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/Dashboard.jsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "UI already exists from previous implementation - Lend/Borrow buttons functional"
+
+  - task: "Compound Lend/Borrow UI"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/Dashboard.jsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "UI already exists from previous implementation - Lend/Borrow buttons functional"
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Aave Integration - Supply/Lend"
+    - "Aave Integration - Borrow"
+    - "Aave Integration - Withdraw"
+    - "Aave Integration - Repay"
+    - "Compound Integration - Supply/Lend"
+    - "Compound Integration - Borrow"
+    - "Compound Integration - Withdraw"
+    - "Compound Integration - Repay"
+    - "DeFi Transaction API Endpoint"
+  stuck_tasks: []
+  test_all: true
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: |
+      Phase 1 Implementation Complete - Aave & Compound Full Integration
+      
+      Implemented Features:
+      1. Aave Integration (/app/backend/aave_integration.py):
+         - build_supply_transaction() - Lend tokens to Aave
+         - build_borrow_transaction() - Borrow tokens from Aave (variable rate)
+         - build_withdraw_transaction() - Withdraw supplied tokens (supports max withdrawal)
+         - build_repay_transaction() - Repay borrowed tokens (supports full repayment)
+         - check_allowance() - Check ERC20 token allowance
+         - build_approval_transaction() - Build ERC20 approval transaction
+      
+      2. Compound Integration (/app/backend/compound_integration.py):
+         - build_supply_transaction() - Lend tokens to Compound V3
+         - build_borrow_transaction() - Borrow base asset (USDC) via withdraw
+         - build_withdraw_transaction() - Withdraw supplied tokens
+         - build_repay_transaction() - Repay borrowed tokens via supply
+         - check_allowance() - Check ERC20 token allowance
+         - build_approval_transaction() - Build ERC20 approval transaction
+      
+      3. Enhanced API Endpoint (/app/backend/server.py):
+         - /api/defi/transaction now supports: lend, borrow, withdraw, repay
+         - Automatic ERC20 approval checking and execution before supply/repay
+         - Supports both Aave and Compound protocols
+         - Proper error handling and transaction storage
+      
+      Testing Requirements:
+      - Test all 4 actions (lend, borrow, withdraw, repay) for both protocols
+      - Verify ERC20 approval transactions are sent when needed
+      - Test with USDC and USDT tokens
+      - Verify transaction building doesn't fail
+      - Check that transactions are properly stored in database
+      
+      Backend Environment:
+      - REACT_APP_BACKEND_URL from frontend/.env
+      - Test user credentials may be needed (register new user or use existing)
+      - Wallet with vault_id needed for transactions
+      
+      Note: Actual on-chain transactions will fail without sufficient balance and gas,
+      but we should verify the transaction building logic works correctly.
