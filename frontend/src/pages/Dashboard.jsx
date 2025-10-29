@@ -153,8 +153,8 @@ const Dashboard = ({ setIsAuthenticated }) => {
 
   const fetchSupportedChains = async () => {
     try {
-      const response = await axios.get(`${API}/layerzero/supported-chains`, getAuthHeaders());
-      setSupportedChains(response.data);
+      const response = await axios.get(`${API}/layerzero/chains`, getAuthHeaders());
+      setSupportedChains(response.data.chains || []);
     } catch (error) {
       console.error("Failed to fetch supported chains:", error);
     }
@@ -162,8 +162,9 @@ const Dashboard = ({ setIsAuthenticated }) => {
 
   const fetchRelayerStatus = async () => {
     try {
-      const response = await axios.get(`${API}/layerzero/relayer-status`, getAuthHeaders());
+      const response = await axios.get(`${API}/layerzero/relayer/status`, getAuthHeaders());
       setRelayerStatus(response.data);
+      setRelayerBalances(response.data.balances || []);
     } catch (error) {
       console.error("Failed to fetch relayer status:", error);
     }
