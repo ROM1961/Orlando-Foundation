@@ -9,10 +9,14 @@ from typing import List, Optional
 import logging
 
 from layerzero_relayer import relayer
-from server import get_current_user
 
 router = APIRouter(prefix="/layerzero", tags=["LayerZero Relayer"])
 logger = logging.getLogger(__name__)
+
+# Import auth dependency inside functions to avoid circular imports
+def get_current_user_dep():
+    from server import get_current_user
+    return get_current_user
 
 
 class RelayerInfoResponse(BaseModel):
