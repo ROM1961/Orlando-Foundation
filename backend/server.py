@@ -608,6 +608,10 @@ async def get_supported_tokens():
 async def root():
     return {"message": "Vault Wallet API", "status": "online", "database": "MongoDB"}
 
+# Initialize Morpho routes with dependencies
+from apis import morpho_routes
+morpho_routes.init_morpho_routes(db, w3, get_current_user, decrypt_private_key)
+
 # Include API routers
 app.include_router(api_router)
 app.include_router(morpho_router, prefix="/api")
