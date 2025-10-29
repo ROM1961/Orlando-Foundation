@@ -410,6 +410,67 @@ agent_communication:
       
       Note: Actual on-chain transactions will fail without sufficient balance and gas,
       but we should verify the transaction building logic works correctly.
+  
+  - agent: "main"
+    message: |
+      Phase 2 Implementation Complete - Morpho Blue Full Integration
+      
+      Backend Enhancements (/app/backend/apis/morpho_routes.py):
+      1. Added POST /api/morpho/repay endpoint:
+         - Repays USDC debt in Morpho Blue
+         - Includes automatic USDC approval checking
+         - Supports partial and full repayment
+      
+      2. Added POST /api/morpho/withdraw-collateral endpoint:
+         - Withdraws ACS collateral from Morpho Blue
+         - Requires sufficient health factor to prevent liquidation
+         - Proper error handling for insufficient collateral
+      
+      3. Existing endpoints verified:
+         - POST /api/morpho/supply-collateral - Supply ACS as collateral
+         - POST /api/morpho/borrow - Borrow USDC against ACS collateral
+         - GET /api/morpho/position/{vault_id} - Get user's Morpho position
+         - GET /api/morpho/market-info - Get market statistics
+         - GET /api/morpho/acs-price - Get ACS token price from oracle
+      
+      Frontend Implementation (/app/frontend/src/pages/Dashboard.jsx):
+      1. Added Morpho Blue section to DeFi Protocols tab:
+         - Purple gradient card design to distinguish from Aave/Compound
+         - Displays current position (collateral and debt)
+         - 4 action buttons: Supply ACS, Borrow USDC, Repay USDC, Withdraw ACS
+      
+      2. Morpho Blue Action Dialog:
+         - Dynamic dialog for all 4 actions
+         - Shows current position summary
+         - Displays market information (total supply, utilization, max LTV)
+         - Amount input with available balance display
+         - Action-specific descriptions and guidance
+      
+      3. State Management:
+         - morphoPosition - stores user's current position
+         - morphoMarketInfo - stores market statistics
+         - Automatic refresh after transactions
+         - Integrated with existing vault and balance fetching
+      
+      Features:
+      - ✅ Supply ACS collateral to Morpho Blue
+      - ✅ Borrow USDC against ACS collateral
+      - ✅ Repay USDC debt
+      - ✅ Withdraw ACS collateral
+      - ✅ Real-time position tracking
+      - ✅ Market information display
+      - ✅ ERC20 approval automation
+      - ✅ Proper error handling
+      
+      Testing Requirements:
+      - Test all 4 Morpho actions (supply, borrow, repay, withdraw)
+      - Verify position data is fetched and displayed correctly
+      - Test market info endpoint
+      - Verify ACS price feed integration
+      - Check approval logic for ACS and USDC
+      - Test error handling for insufficient collateral/funds
+      
+      Ready for comprehensive testing of Morpho Blue integration!
 
   - agent: "testing"
     message: |
