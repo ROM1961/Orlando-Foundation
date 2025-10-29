@@ -718,6 +718,7 @@ async def root():
 # Include API routers
 app.include_router(api_router)
 app.include_router(morpho_router, prefix="/api")
+app.include_router(layerzero_router, prefix="/api")
 
 app.add_middleware(
     CORSMiddleware,
