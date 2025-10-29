@@ -64,7 +64,7 @@ async def get_relayer_info():
 
 
 @router.get("/relayer/status", response_model=RelayerStatusResponse)
-async def get_relayer_status(user_id: str = Depends(get_current_user_dep())):
+async def get_relayer_status():
     """Get comprehensive relayer status including balances across all chains"""
     try:
         status = relayer.get_relayer_status()
