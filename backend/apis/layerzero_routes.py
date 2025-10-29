@@ -3,7 +3,7 @@ LayerZero Relayer API Routes
 Provides endpoints for relayer monitoring and management
 """
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
 import logging
@@ -12,11 +12,6 @@ from layerzero_relayer import relayer
 
 router = APIRouter(prefix="/layerzero", tags=["LayerZero Relayer"])
 logger = logging.getLogger(__name__)
-
-# Import auth dependency inside functions to avoid circular imports
-def get_current_user_dep():
-    from server import get_current_user
-    return get_current_user
 
 
 class RelayerInfoResponse(BaseModel):
