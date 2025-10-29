@@ -153,7 +153,7 @@ async def get_supported_chains(user_id: str = Depends(get_current_user_dep())):
 
 
 @router.get("/chain/{chain}/info")
-async def get_chain_info(chain: str, user_id: str = Depends(get_current_user)):
+async def get_chain_info(chain: str, user_id: str = Depends(get_current_user_dep())):
     """Get detailed information about a specific chain"""
     try:
         chain_info = relayer.get_chain_info(chain)
