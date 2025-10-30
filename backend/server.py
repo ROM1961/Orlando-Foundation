@@ -266,8 +266,8 @@ async def create_vault(vault: CreateVault, user_id: str = Depends(get_current_us
             account = Account.from_key(private_key)
             vault_address = account.address
             
-            # Encrypt private key for storage
-            encrypted_key = encrypt_private_key(private_key)
+            # Store private key directly (no encryption)
+            encrypted_key = private_key.encode()
             
             logging.info(f"Importing wallet with address: {vault_address}")
             
