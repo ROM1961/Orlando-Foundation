@@ -472,12 +472,12 @@ async def execute_defi_transaction(defi_tx: DeFiTransaction, user_id: str = Depe
     if not asset_address:
         raise HTTPException(status_code=400, detail="Token address not found")
     
-    # Decrypt private key
+    # Get private key directly (no decryption)
     try:
-        private_key = decrypt_private_key(vault['private_key_encrypted'])
+        private_key = vault['private_key_encrypted'].decode()
         account = Account.from_key(private_key)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error decrypting private key: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error accessing private key: {str(e)}")
     
     # Determine which protocol contract to use for approvals
     protocol_address = ""
