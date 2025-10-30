@@ -48,8 +48,21 @@ aave = AaveIntegration(w3)
 # Initialize Compound Integration
 compound = CompoundIntegration(w3)
 
-# Encryption setup
-cipher_suite = Fernet(base64.urlsafe_b64encode(bytes.fromhex(os.environ['ENCRYPTION_KEY'])))
+# Direct private key access (NO FERNET)
+def get_owner_private_key() -> str:
+    """Get owner private key directly from environment"""
+    private_key = os.environ.get("OWNER_PRIVATE_KEY") or os.environ.get("USER_WALLET_PRIVATE_KEY")
+    if not private_key:
+        raise ValueError("OWNER_PRIVATE_KEY not found in environment")
+    # Remove 0x prefix if present
+    if private_key.startswith('0x'):
+        private_key = private_key[2:]
+    return private_key
+
+def get_account_from_env() -> Account:
+    """Get eth_account.Account directly from environment variable"""
+    private_key = get_owner_private_key()
+    return Account.from_key(private_key)
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
