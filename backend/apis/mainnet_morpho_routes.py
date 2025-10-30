@@ -279,9 +279,16 @@ async def supply_collateral_with_gas_sponsorship(request: GasSponsoredSupplyRequ
 async def borrow_with_gas_sponsorship(request: GasSponsoredBorrowRequest):
     """
     Supply ACS collateral and borrow USDC with LayerZero Relayer paying all gas fees
-    This is the complete flow for testing your first borrow transaction
+    Relayer transfers ETH to user wallet first for gas, then user executes transactions
     """
     try:
+        # Step 0: Auto-sponsor gas if needed
+        logger.info("🔍 Checking if gas sponsorship needed...")
+        gas_result = auto_sponsor_if_needed()
+        gas_sponsored_amount = gas_result.get('amount_eth', 0)
+        gas_tx_hash = gas_result.get('tx_hash', None)
+        logger.info(f"Gas sponsorship: {gas_result.get('message')}")
+        
         user_account = Account.from_key(USER_WALLET_PRIVATE_KEY)
         
         collateral_in_wei = int(request.collateral_amount_acs * 1e18)
@@ -290,6 +297,7 @@ async def borrow_with_gas_sponsorship(request: GasSponsoredBorrowRequest):
         logger.info(f"🚀 Starting gas-sponsored borrow transaction...")
         logger.info(f"Collateral: {request.collateral_amount_acs} ACS")
         logger.info(f"Borrow: {request.borrow_amount_usdc} USDC")
+        logger.info(f"Gas sponsored: {gas_sponsored_amount:.6f} ETH")
         logger.info(f"Gas paid by: {RELAYER_ADDRESS}")
         
         # Step 1: Approve ACS (if needed)
