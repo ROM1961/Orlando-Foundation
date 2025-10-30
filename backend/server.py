@@ -14,8 +14,7 @@ from passlib.context import CryptContext
 import jwt
 from web3 import Web3
 from eth_account import Account
-from cryptography.fernet import Fernet
-import base64
+# Removed Fernet encryption imports
 from euler_integration import EulerV2Integration, EULER_ADDRESSES
 from multi_token import MultiTokenManager
 from token_config import TOKEN_CONFIG
