@@ -377,12 +377,12 @@ async def send_transaction(vault_id: str, tx: SendTransaction, user_id: str = De
     if tx.token not in TOKEN_CONFIG:
         raise HTTPException(status_code=400, detail=f"Unsupported token: {tx.token}")
     
-    # Decrypt private key
+    # Get private key directly (no decryption)
     try:
-        private_key = decrypt_private_key(vault['private_key_encrypted'])
+        private_key = vault['private_key_encrypted'].decode()
         account = Account.from_key(private_key)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error decrypting private key: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error accessing private key: {str(e)}")
     
     # Build transaction using multi-token manager
     try:
