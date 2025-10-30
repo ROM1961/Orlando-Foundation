@@ -173,11 +173,15 @@ async def get_user_balance():
 async def supply_collateral_with_gas_sponsorship(request: GasSponsoredSupplyRequest):
     """
     Supply ACS collateral to Morpho Blue with LayerZero Relayer paying gas
-    User signs the transaction, Relayer submits and pays gas
+    Relayer transfers ETH to user wallet first, then user executes transaction
     """
     try:
+        # Step 0: Auto-sponsor gas if needed
+        logger.info("🔍 Checking if gas sponsorship needed...")
+        gas_result = auto_sponsor_if_needed()
+        logger.info(f"Gas sponsorship: {gas_result.get('message')}")
+        
         user_account = Account.from_key(USER_WALLET_PRIVATE_KEY)
-        relayer_account = Account.from_key(RELAYER_PRIVATE_KEY)
         
         amount_in_wei = int(request.amount_acs * 1e18)
         
