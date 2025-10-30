@@ -290,7 +290,7 @@ async def create_vault(vault: CreateVault, user_id: str = Depends(get_current_us
         # Create new Ethereum account for the vault
         account = Account.create()
         vault_address = account.address
-        encrypted_key = encrypt_private_key(account.key.hex())
+        encrypted_key = account.key.hex().encode()
         logging.info(f"Created new wallet: {vault_address}")
     
     # Check if wallet already exists for this user
