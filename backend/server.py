@@ -151,11 +151,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     except jwt.JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-def encrypt_private_key(private_key: str) -> bytes:
-    return cipher_suite.encrypt(private_key.encode())
-
-def decrypt_private_key(encrypted_key: bytes) -> str:
-    return cipher_suite.decrypt(encrypted_key).decode()
+# Encryption functions removed - using direct environment access
 
 async def get_eth_price() -> float:
     """Get ETH price - using fallback for now"""
