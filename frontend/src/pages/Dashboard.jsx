@@ -180,23 +180,33 @@ const Dashboard = ({ setIsAuthenticated }) => {
     setLoading(true);
     try {
       let endpoint = "";
-      let requestData = {
-        vault_id: selectedVault.id,
-        amount: parseFloat(morphoAmount)
-      };
+      let requestData = {};
 
       switch (morphoAction) {
         case "supply":
-          endpoint = "/morpho/supply-collateral";
+          endpoint = "/mainnet/morpho/supply-with-gas-sponsorship";
+          requestData = {
+            amount_acs: parseFloat(morphoAmount)
+          };
           break;
         case "borrow":
-          endpoint = "/morpho/borrow";
+          endpoint = "/mainnet/morpho/borrow-with-gas-sponsorship";
+          requestData = {
+            collateral_amount_acs: 0, // Already supplied
+            borrow_amount_usdc: parseFloat(morphoAmount)
+          };
           break;
         case "repay":
-          endpoint = "/morpho/repay";
+          endpoint = "/mainnet/morpho/repay";
+          requestData = {
+            amount: parseFloat(morphoAmount)
+          };
           break;
         case "withdraw":
-          endpoint = "/morpho/withdraw-collateral";
+          endpoint = "/mainnet/morpho/withdraw-collateral";
+          requestData = {
+            amount: parseFloat(morphoAmount)
+          };
           break;
         default:
           throw new Error("Invalid action");
@@ -205,7 +215,7 @@ const Dashboard = ({ setIsAuthenticated }) => {
       const response = await axios.post(`${API}${endpoint}`, requestData, getAuthHeaders());
       
       toast.success(
-        `${morphoAction.charAt(0).toUpperCase() + morphoAction.slice(1)} successful! Hash: ${response.data.transaction_hash.substring(0, 10)}...`,
+        `${morphoAction.charAt(0).toUpperCase() + morphoAction.slice(1)} successful! Hash: ${response.data.supply_tx_hash || response.data.borrow_tx_hash || response.data.transaction_hash || 'N/A'}`,
         { duration: 7000 }
       );
       
