@@ -135,7 +135,7 @@ const Dashboard = ({ setIsAuthenticated }) => {
   const fetchMorphoPosition = async () => {
     if (!selectedVault) return;
     try {
-      const response = await axios.get(`${API}/morpho/position/${selectedVault.id}`, getAuthHeaders());
+      const response = await axios.get(`${API}/mainnet/morpho/position`, getAuthHeaders());
       setMorphoPosition(response.data);
     } catch (error) {
       console.error("Failed to fetch Morpho position:", error);
@@ -144,7 +144,7 @@ const Dashboard = ({ setIsAuthenticated }) => {
 
   const fetchMorphoMarketInfo = async () => {
     try {
-      const response = await axios.get(`${API}/morpho/market-info`, getAuthHeaders());
+      const response = await axios.get(`${API}/mainnet/morpho/config`, getAuthHeaders());
       setMorphoMarketInfo(response.data);
     } catch (error) {
       console.error("Failed to fetch Morpho market info:", error);
