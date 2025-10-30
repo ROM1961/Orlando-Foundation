@@ -385,15 +385,16 @@ async def borrow_with_gas_sponsorship(request: GasSponsoredBorrowRequest):
         total_gas_cost = (approval_gas_cost + supply_gas_cost + borrow_gas_cost) / 1e18
         
         logger.info(f"✅ Borrow tx: {borrow_hash.hex()}")
-        logger.info(f"💰 Total gas paid by relayer: {total_gas_cost} ETH")
+        logger.info(f"💰 Total gas cost: {total_gas_cost} ETH")
+        logger.info(f"💰 Gas sponsored by relayer: {gas_sponsored_amount} ETH")
         
         return TransactionResponse(
             success=True,
-            message=f"Successfully borrowed {request.borrow_amount_usdc} USDC using {request.collateral_amount_acs} ACS collateral",
+            message=f"Successfully borrowed {request.borrow_amount_usdc} USDC using {request.collateral_amount_acs} ACS collateral. Gas sponsored: {gas_sponsored_amount:.6f} ETH",
             approval_tx_hash=approval_tx_hash,
             supply_tx_hash=supply_hash.hex(),
             borrow_tx_hash=borrow_hash.hex(),
-            gas_paid_by=RELAYER_ADDRESS,
+            gas_paid_by=f"Relayer (sponsored {gas_sponsored_amount:.6f} ETH)",
             total_gas_cost_eth=f"{total_gas_cost:.6f}"
         )
         
