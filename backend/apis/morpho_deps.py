@@ -4,7 +4,7 @@ Morpho routes dependencies - to avoid circular imports
 import os
 from motor.motor_asyncio import AsyncIOMotorClient
 from web3 import Web3, HTTPProvider
-from cryptography.fernet import Fernet
+from eth_account import Account
 
 # Database connection
 MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
@@ -22,11 +22,21 @@ if not ALCHEMY_API_KEY:
 
 w3 = Web3(HTTPProvider(f'https://eth-mainnet.g.alchemy.com/v2/{ALCHEMY_API_KEY}'))
 
-# Decryption
-ENCRYPTION_KEY = os.environ.get('ENCRYPTION_KEY')
+# Direct private key access (NO FERNET)
+def get_owner_private_key() -> str:
+    """Get owner private key directly from environment"""
+    private_key = os.environ.get("OWNER_PRIVATE_KEY") or os.environ.get("USER_WALLET_PRIVATE_KEY")
+    if not private_key:
+        raise ValueError("OWNER_PRIVATE_KEY not found in environment")
+    # Remove 0x prefix if present
+    if private_key.startswith('0x'):
+        private_key = private_key[2:]
+    return private_key
 
 def decrypt_private_key(encrypted_key: bytes) -> str:
-    """Decrypt private key"""
-    cipher_suite = Fernet(ENCRYPTION_KEY.encode())
-    decrypted = cipher_suite.decrypt(encrypted_key)
-    return decrypted.decode()
+    """Get private key directly (no decryption needed)"""
+    # If it's stored as bytes, decode it
+    if isinstance(encrypted_key, bytes):
+        return encrypted_key.decode()
+    return encrypted_key
+
