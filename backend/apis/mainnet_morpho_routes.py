@@ -19,6 +19,7 @@ from libs.morpho_blue import (
     MORPHO_ADAPTIVE_CURVE_IRM,
     DEFAULT_ACS_USDC_MARKET
 )
+from apis.gas_sponsor import auto_sponsor_if_needed, check_user_eth_balance, check_relayer_eth_balance
 
 router = APIRouter(prefix="/mainnet/morpho", tags=["Mainnet Morpho Blue"])
 logger = logging.getLogger(__name__)
