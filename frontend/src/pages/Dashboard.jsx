@@ -1076,19 +1076,23 @@ const Dashboard = ({ setIsAuthenticated }) => {
             {/* Market Info */}
             {morphoMarketInfo && (
               <div className="bg-purple-900/20 p-3 rounded-lg border border-purple-500/30">
-                <p className="text-xs text-gray-300 mb-2">Market Information</p>
+                <p className="text-xs text-gray-300 mb-2">Market Configuration</p>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
-                    <p className="text-gray-400">Total Supply</p>
-                    <p className="text-white">{morphoMarketInfo.total_supply_assets.toFixed(0)} USDC</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400">Utilization</p>
-                    <p className="text-white">{morphoMarketInfo.utilization_rate.toFixed(1)}%</p>
+                    <p className="text-gray-400">Protocol</p>
+                    <p className="text-white">Morpho Blue</p>
                   </div>
                   <div>
                     <p className="text-gray-400">Max LTV</p>
-                    <p className="text-white">{morphoMarketInfo.lltv.toFixed(0)}%</p>
+                    <p className="text-white">{morphoMarketInfo.lltv || "75%"}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400">Collateral</p>
+                    <p className="text-white">ACS</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400">Loan Token</p>
+                    <p className="text-white">USDC</p>
                   </div>
                 </div>
               </div>
