@@ -107,6 +107,46 @@ async def get_mainnet_config():
     }
 
 
+@router.get("/gas-status")
+async def get_gas_status():
+    """Check gas sponsorship status and balances"""
+    try:
+        user_balance = check_user_eth_balance()
+        relayer_balance = check_relayer_eth_balance()
+        
+        from apis.gas_sponsor import estimate_gas_needed
+        estimated_needed = estimate_gas_needed(3)
+        
+        needs_sponsorship = user_balance < estimated_needed
+        
+        return {
+            "user_wallet": USER_WALLET_ADDRESS,
+            "user_eth_balance": f"{user_balance:.6f}",
+            "relayer_wallet": RELAYER_ADDRESS,
+            "relayer_eth_balance": f"{relayer_balance:.6f}",
+            "estimated_gas_needed": f"{estimated_needed:.6f}",
+            "needs_sponsorship": needs_sponsorship,
+            "status": "insufficient_gas" if needs_sponsorship else "ready"
+        }
+    except Exception as e:
+        logger.error(f"Error getting gas status: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/sponsor-gas")
+async def sponsor_gas_endpoint():
+    """
+    Transfer ETH from relayer to user wallet for gas fees
+    Call this before executing transactions if user has insufficient ETH
+    """
+    try:
+        result = auto_sponsor_if_needed()
+        return result
+    except Exception as e:
+        logger.error(f"Error sponsoring gas: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get("/user/balance")
 async def get_user_balance():
     """Get user's ACS and USDC balance"""
