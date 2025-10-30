@@ -1063,11 +1063,11 @@ const Dashboard = ({ setIsAuthenticated }) => {
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
                     <p className="text-gray-400">Collateral</p>
-                    <p className="text-white font-semibold">{morphoPosition.collateral_formatted.toFixed(2)} ACS</p>
+                    <p className="text-white font-semibold">{(morphoPosition.collateral_formatted_acs || 0).toFixed(2)} ACS</p>
                   </div>
                   <div>
                     <p className="text-gray-400">Debt</p>
-                    <p className="text-white font-semibold">{morphoPosition.borrow_formatted.toFixed(2)} USDC</p>
+                    <p className="text-white font-semibold">{(morphoPosition.borrow_formatted_usdc || 0).toFixed(2)} USDC</p>
                   </div>
                 </div>
               </div>
