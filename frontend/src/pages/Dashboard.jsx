@@ -133,7 +133,7 @@ const Dashboard = ({ setIsAuthenticated }) => {
   };
 
   const fetchMorphoPosition = async () => {
-    if (!selectedVault) return;
+    // Mainnet Morpho uses OWNER_PRIVATE_KEY, no vault needed
     try {
       const response = await axios.get(`${API}/mainnet/morpho/position`, getAuthHeaders());
       setMorphoPosition(response.data);
