@@ -77,12 +77,12 @@ const Dashboard = ({ setIsAuthenticated }) => {
     if (selectedVault) {
       fetchBalance();
       fetchTransactions();
-      fetchMorphoPosition();
     }
   }, [selectedVault]);
 
   useEffect(() => {
     fetchMorphoMarketInfo();
+    fetchMorphoPosition();  // Always fetch Morpho position (uses env wallet)
   }, []);
 
   const fetchVaults = async () => {
