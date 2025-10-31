@@ -172,11 +172,8 @@ const Dashboard = ({ setIsAuthenticated }) => {
 
   const handleMorphoAction = async (e) => {
     e.preventDefault();
-    if (!selectedVault) {
-      toast.error("Please select a vault first");
-      return;
-    }
-
+    
+    // Mainnet Morpho uses OWNER_PRIVATE_KEY from environment, no vault needed
     setLoading(true);
     try {
       let endpoint = "";
@@ -226,11 +223,7 @@ const Dashboard = ({ setIsAuthenticated }) => {
       fetchTransactions();
     } catch (error) {
       const errorMsg = error.response?.data?.detail || `${morphoAction} failed`;
-      if (errorMsg.includes("watch") || errorMsg.includes("private key")) {
-        toast.error("Cannot transact: This is a watch-only wallet. Create a new wallet to execute transactions.");
-      } else {
-        toast.error(errorMsg);
-      }
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
