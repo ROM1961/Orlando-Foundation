@@ -173,6 +173,15 @@ const Dashboard = ({ setIsAuthenticated }) => {
     }
   };
 
+  const fetchSushiPoolInfo = async () => {
+    try {
+      const response = await axios.get(`${API}/sushiswap/pool-info`, getAuthHeaders());
+      setSushiPoolInfo(response.data);
+    } catch (error) {
+      console.error("Failed to fetch SushiSwap pool info:", error);
+    }
+  };
+
   const handleMorphoAction = async (e) => {
     e.preventDefault();
     
