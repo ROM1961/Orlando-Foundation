@@ -74,6 +74,7 @@ const Dashboard = ({ setIsAuthenticated }) => {
     fetchProtocols();
     fetchSupportedChains();
     fetchRelayerStatus();
+    fetchSushiPoolInfo();
   }, []);
 
   useEffect(() => {
