@@ -732,6 +732,7 @@ app.include_router(morpho_router, prefix="/api")
 app.include_router(layerzero_router, prefix="/api")
 app.include_router(mainnet_morpho_router, prefix="/api")
 app.include_router(artcube_router, prefix="/api")
+app.include_router(sushiswap_router, prefix="/api")
 
 app.add_middleware(
     CORSMiddleware,
