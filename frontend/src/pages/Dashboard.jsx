@@ -810,6 +810,45 @@ const Dashboard = ({ setIsAuthenticated }) => {
                               </Button>
                             </div>
                           </div>
+                          
+                          {/* SushiSwap V3 Pool */}
+                          {sushiPoolInfo && (
+                            <div className="p-4 bg-gradient-to-r from-pink-900/30 to-orange-900/30 rounded-lg border border-pink-500/30 hover:bg-pink-900/40 transition">
+                              <div className="flex items-center justify-between mb-3">
+                                <div>
+                                  <p className="font-medium text-white">SushiSwap V3</p>
+                                  <p className="text-xs text-gray-400">{sushiPoolInfo.pair_name} Pool</p>
+                                </div>
+                                <Badge variant="outline" className="border-pink-500 text-pink-400">
+                                  {sushiPoolInfo.fee_tier}% Fee
+                                </Badge>
+                              </div>
+                              
+                              <div className="grid grid-cols-2 gap-2 mb-3 text-xs">
+                                <div className="bg-slate-800/50 p-2 rounded">
+                                  <p className="text-gray-400">Token Pair</p>
+                                  <p className="text-white font-semibold">{sushiPoolInfo.token0.symbol}/{sushiPoolInfo.token1.symbol}</p>
+                                </div>
+                                <div className="bg-slate-800/50 p-2 rounded">
+                                  <p className="text-gray-400">Current Price</p>
+                                  <p className="text-white font-semibold">{sushiPoolInfo.current_price.toFixed(6)}</p>
+                                </div>
+                              </div>
+                              
+                              <Button 
+                                size="sm" 
+                                className="w-full bg-gradient-to-r from-pink-600 to-orange-600 hover:from-pink-700 hover:to-orange-700 text-white"
+                                onClick={() => {
+                                  window.open(sushiPoolInfo.pool_url, '_blank');
+                                }}
+                              >
+                                <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                </svg>
+                                Open Pool on SushiSwap
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       </TabsContent>
                       
