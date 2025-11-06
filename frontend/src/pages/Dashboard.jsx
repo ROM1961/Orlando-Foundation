@@ -59,6 +59,9 @@ const Dashboard = ({ setIsAuthenticated }) => {
   const [relayerBalances, setRelayerBalances] = useState([]);
   const [supportedChains, setSupportedChains] = useState([]);
 
+  // SushiSwap state
+  const [sushiPoolInfo, setSushiPoolInfo] = useState(null);
+
   const username = localStorage.getItem("username");
   const token = localStorage.getItem("token");
 
